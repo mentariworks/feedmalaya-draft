@@ -3,6 +3,8 @@
 <head>
 	<meta charset="utf-8">
 	<title><?php echo $title; ?></title>
+	<?php \Asset::add_path('public/assets'); ?>
+	<?php echo \Asset::js('jquery-1.5.1.min.js'); ?>
 	<style type="text/css">
 		* { margin: 0; padding: 0; }
 		body { background-color: #EEE; font-family: sans-serif; font-size: 16px; line-height: 20px; margin: 40px; }
