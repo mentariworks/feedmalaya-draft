@@ -127,7 +127,7 @@ return array(
 		 * );
 		 */
 		'packages'	=> array(
-			// 'activerecord',
+			'activerecord',
 		),
 
 		/**
@@ -153,7 +153,9 @@ return array(
 		 * add it like 'session' => 'auth'.
 		 * If you don't want the config in a group use null as groupname.
 		 */
-		'config'	=> array(),
+		'config'	=> array(
+			'\\Factory',
+		),
 
 		/**
 		 * Language files to autoload
