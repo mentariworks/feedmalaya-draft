@@ -20,7 +20,7 @@ return array(
         'type'            => 'mysql',
         'connection'    => array(
             'hostname'   => 'localhost',
-            'database'   => 'fuel_dev',
+            'database'   => 'feedmalaya_dev',
             'username'   => 'root',
             'password'   => '',
             'persistent' => false,
@@ -35,7 +35,7 @@ return array(
         'type'            => 'mysql',
         'connection'    => array(
             'hostname'   => 'localhost',
-            'database'   => 'fuel_prod',
+            'database'   => 'feedmalaya_prod',
             'username'   => 'root',
             'password'   => '',
             'persistent' => false,
@@ -50,7 +50,7 @@ return array(
         'type'            => 'mysql',
         'connection'    => array(
             'hostname'   => 'localhost',
-            'database'   => 'fuel_test',
+            'database'   => 'feedmalaya_test',
             'username'   => 'root',
             'password'   => '',
             'persistent' => false,
@@ -65,7 +65,7 @@ return array(
         'type'            => 'mysql',
         'connection'    => array(
             'hostname'   => 'localhost',
-            'database'   => 'fuel_qa',
+            'database'   => 'feedmalaya_qa',
             'username'   => 'root',
             'password'   => '',
             'persistent' => false,
