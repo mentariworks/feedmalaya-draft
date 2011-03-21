@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title><?php echo e($title); ?></title>
+	<title><?php echo $title; ?></title>
 	<style type="text/css">
 		* { margin: 0; padding: 0; }
 		body { background-color: #EEE; font-family: sans-serif; font-size: 16px; line-height: 20px; margin: 40px; }
@@ -23,18 +23,7 @@
 </head>
 <body>
 	<div id="wrapper">
-		<h1><?php echo e($title); ?></h1>
-		
-		<p class="intro">The page you are looking for cannot be found.</p>
-		
-		<p>The controller that is generating this page is located here:</p>
-
-		<pre><code>APPPATH/classes/controller/welcome.php</code></pre>
-
-		<p>This view can be located here:</p>
-		
-		<pre><code>APPPATH/views/welcome/404.php</code></pre>
-
+		<div id="content"><?php echo $content; ?></div>
 
 		<p class="footer">
 			<a href="http://fuelphp.com">Fuel PHP</a> is released under the MIT license.<br />Page rendered in {exec_time}s using {mem_usage}mb of memory.

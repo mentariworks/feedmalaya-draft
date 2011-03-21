@@ -94,7 +94,7 @@ return array(
 		/**
 		 * Whether to automatically encode (htmlentities) view data
 		 */
-		'auto_encode_view_data'	=> true,
+		'auto_encode_view_data'	=> false,
 	),
 
 	/**
@@ -128,6 +128,7 @@ return array(
 		 */
 		'packages'	=> array(
 			'activerecord',
+			'hybrid',
 		),
 
 		/**
@@ -143,7 +144,9 @@ return array(
 		/**
 		 * Classes to autoload & initialize even when not used
 		 */
-		'classes'	=> array(),
+		'classes'	=> array(
+			'\\Factory',
+		),
 
 		/**
 		 * Configs to autoload
@@ -153,9 +156,7 @@ return array(
 		 * add it like 'session' => 'auth'.
 		 * If you don't want the config in a group use null as groupname.
 		 */
-		'config'	=> array(
-			'\\Factory',
-		),
+		'config'	=> array(),
 
 		/**
 		 * Language files to autoload
