@@ -10,7 +10,8 @@ FeedMalaya is a social feed aggregator using FuelPHP, SimplePie and MySQL databa
 ## Contributors
 
 * Mior Muhammad Zaki (Lead Developer)
-* Mohd Huzairy
+* Hizam Mohd (Developer)
+* Mohd Huzairy (Designer)
 
 You can apply to be come a contributor by leaving a Twitter Direct Message to @feedmalaya or by forking the repository and send a pull request for any of code contribution you have done.
 
