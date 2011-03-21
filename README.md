@@ -6,6 +6,7 @@ FeedMalaya is a social feed aggregator using FuelPHP, SimplePie and MySQL databa
 
 * PHP 5.3.2
 * MySQL 5
+* Any web server
 
 ## Contributors
 
@@ -21,3 +22,4 @@ Installation is promptly simple, all you need to do is clone/fork the project us
 
 * `php oil r install`
 * `php oil r migrate`
+* Rename file *fuel/app/config/db.php.example* to *db.php* and configure your database (contributor by default should use 'dev' environment)
