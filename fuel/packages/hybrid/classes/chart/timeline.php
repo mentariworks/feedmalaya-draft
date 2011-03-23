@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Fuel
  *
@@ -23,20 +24,20 @@ namespace Hybrid;
  * @author Mior Muhammad Zaki <crynobone@gmail.com>
  */
 class Chart_Timeline extends Chart {
-	
+
 	public function __construct() {
 		parent::__construct();
-		
+
 		$this->set_options(\Config::get('visualization.chart.timeline', array()));
 	}
-		
+
 	public function generate($width = '100%', $height = '300px') {
 		$columns = $this->columns;
 		$rows = $this->rows;
-		
+
 		$this->set_options('width', $width);
 		$this->set_options('height', $height);
-		
+
 		$options = json_encode($this->options);
 
 		$id = 'timeline_' . md5($columns . $rows . time());
@@ -57,5 +58,6 @@ function draw_{$id}() {
 </script>
 SCRIPT;
 	}
-	
-} 
+
+}
+

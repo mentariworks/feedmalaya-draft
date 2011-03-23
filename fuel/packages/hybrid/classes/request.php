@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Fuel
  *
@@ -19,8 +20,8 @@ namespace Hybrid;
  * affecting the standard workflow when the application doesn't actually 
  * utilize Hybrid feature.
  */
-
 class Request extends \Fuel\Core\Request {
+
 	/**
 	 * Generates a new `curl` request without going through HTTP connection, 
 	 * this allow user session can be shared between both request `client` and `server`. 
@@ -36,7 +37,7 @@ class Request extends \Fuel\Core\Request {
 	 * @param array $dataset	Set a dataset for GET, POST, PUT or DELETE
 	 * @return object			The new request
 	 */
-	public static function connector($uri, $dataset = array ()) {
+	public static function connector($uri, $dataset = array()) {
 		$uri_segments = explode(' ', $uri);
 		$type = 'GET';
 
@@ -44,15 +45,15 @@ class Request extends \Fuel\Core\Request {
 			$uri = $uri_segments[1];
 			$type = $uri_segments[0];
 		}
-		
-		$query_dataset = array ();
+
+		$query_dataset = array();
 		$query_string = parse_url($uri);
-		
+
 		if (isset($query_string['query'])) {
 			$uri = $query_string['path'];
 			parse_str($query_string['query'], $query_dataset);
 		}
-		
+
 		$dataset = array_merge($query_dataset, $dataset);
 
 		logger(\Fuel::L_INFO, 'Creating a new Request with URI = "' . $uri . '"', __METHOD__);
@@ -66,13 +67,13 @@ class Request extends \Fuel\Core\Request {
 
 		return static::$active;
 	}
-	
+
 	private static $_request_data = array();
 	private static $_request_method = '';
 
 	/**
 	 * Creates the new Request object by getting a new URI object, then parsing
-     * the uri with the Route class. Once constructed we need to save the method 
+	 * the uri with the Route class. Once constructed we need to save the method 
 	 * and GET/POST/PUT or DELETE dataset
 	 * 
 	 * @param string $uri		The URI of the request
@@ -86,10 +87,10 @@ class Request extends \Fuel\Core\Request {
 		// store this construct method and data staticly
 		static::$_request_method = $type;
 		static::$_request_data = $dataset;
-		
+
 		$this->output = NULL;
 	}
-	
+
 	/**
 	 * This executes the request and sets the output to be used later. 
 	 * Cleaning up our request after executing \Request::execute()
@@ -106,20 +107,20 @@ class Request extends \Fuel\Core\Request {
 		// Since this just a imitation of curl request, \Hybrid\Input need to know the 
 		// request method and data available in the connection.
 		\Hybrid\Input::connect(static::$_request_method, static::$_request_data);
-		
+
 		// Keep a copy or current HTTP Response status
 		$status = \Output::$status;
-		
+
 		$execute = new stdClass();
 
 		$execute->response = parent::execute();
 
 		$execute->status = \Output::$status;
-		
+
 		// Revert HTTP Response status to that value before this connection. 
 		// Sub-request response status shouldn't affect the original request.
 		\Output::$status = $status;
-		
+
 		// We need to clean-up any request object transfered to \Hybrid\Input so that
 		// any following request to \Hybrid\Input will redirected to \Fuel\Core\Input
 		\Hybrid\Input::disconnect();

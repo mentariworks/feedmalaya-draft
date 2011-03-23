@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Fuel
  *
@@ -23,7 +24,7 @@ namespace Hybrid;
  * @author Mior Muhammad Zaki <crynobone@gmail.com>
  */
 abstract class Chart {
-	
+
 	public static function _init() {
 		\Config::load('visualization', true);
 	}
@@ -38,8 +39,8 @@ abstract class Chart {
 	public static function factory() {
 		return new static();
 	}
-	
-	protected $options = array ();
+
+	protected $options = array();
 	protected $hAxis = 'string';
 	protected $columns = '';
 	protected $rows = '';
@@ -60,10 +61,10 @@ abstract class Chart {
 	 * @return boolean
 	 */
 	public function clear() {
-		$this->options = array ();
+		$this->options = array();
 		$this->columns = '';
 		$this->rows = '';
-		
+
 		return true;
 	}
 
@@ -74,7 +75,7 @@ abstract class Chart {
 	 */
 	public function set_columns($data = array()) {
 		$this->columns = '';
-		
+
 		$count = 0;
 
 		if (count($data) > 0) {
@@ -82,13 +83,13 @@ abstract class Chart {
 				if ($count === 0) {
 					$this->hAxis = $value;
 				}
-				
+
 				$this->columns .= "data.addColumn('{$value}', '{$key}');\r\n";
 				$count++;
 			}
 		}
 	}
-	
+
 	/**
 	 * Set chart options
 	 * 
@@ -100,19 +101,19 @@ abstract class Chart {
 		if (is_null($name)) {
 			return false;
 		}
-		
+
 		if (is_array($name)) {
 			foreach ($name as $key => $value) {
 				$this->options[$key] = $value;
 			}
-			
+
 			return true;
 		}
-		
+
 		if (is_string($name)) {
 			$this->options[$name] = $value;
 		}
-		
+
 		return true;
 	}
 
@@ -124,7 +125,7 @@ abstract class Chart {
 	public function set_rows($data = array()) {
 		$this->rows = "";
 		$dataset = '';
-		
+
 		$x = 0;
 		$y = 0;
 
@@ -132,13 +133,12 @@ abstract class Chart {
 			foreach ($data as $key => $value) {
 				if ($this->hAxis == 'date') {
 					$key = $this->parse_date($key);
-				}
-				else {
+				} else {
 					$key = sprintf("'%s'", $key);
 				}
-				
+
 				$dataset .= "data.setValue({$x}, {$y}, " . $key . ");\r\n";
-				
+
 				foreach ($value as $k => $v) {
 					$y++;
 					$dataset .= "data.setValue({$x}, {$y}, {$v});\r\n";
@@ -147,9 +147,9 @@ abstract class Chart {
 				$y = 0;
 			}
 		}
-		$this->rows .= "data.addRows(" . $x .");\r\n{$dataset}";
+		$this->rows .= "data.addRows(" . $x . ");\r\n{$dataset}";
 	}
-	
+
 	/**
 	 * Parse PHP Date Object into JavaScript new Date() format
 	 * 
@@ -161,7 +161,7 @@ abstract class Chart {
 		$key = strtotime($date);
 		return 'new Date(' . date('Y', $key) . ', ' . (date('m', $key) - 1) . ', ' . date('d', $key) . ')';
 	}
-	
+
 	/**
 	 * Generate the chart
 	 * 
@@ -169,5 +169,4 @@ abstract class Chart {
 	 * @access public
 	 */
 	public abstract function generate($width, $height);
-
 }

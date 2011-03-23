@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Fuel
  *
@@ -38,13 +39,12 @@ abstract class Controller_Template extends \Fuel\Core\Controller_Template {
 		$this->user = \Hybrid\Acl_User::get();
 
 		\Event::trigger('controller_before');
-		
+
 		$file = \Config::get('app.template');
 
 		if (is_file(APPPATH . 'views/themes/' . $file . '.php')) {
 			$this->template = 'themes/' . $file;
 		}
-
 
 		return parent::before();
 	}
@@ -52,9 +52,9 @@ abstract class Controller_Template extends \Fuel\Core\Controller_Template {
 	public function after() {
 		//we dont want to accidentally change our site_name
 		$this->template->site_name = \Config::get('app.site_name');
-		
+
 		\Event::trigger('controller_after');
-		
+
 		return parent::after();
 	}
 

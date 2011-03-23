@@ -19,7 +19,7 @@ class Acl_User {
 
 	protected static $items = null;
 	public static $acl = NULL;
-	
+
 	/**
 	 * Default value for user data
 	 * 
@@ -29,7 +29,7 @@ class Acl_User {
 	 */
 	private static function _set_default() {
 		$twitter = 0;
-		
+
 		static::$items = array(
 			'id' => 0,
 			'user_name' => 'guest',
@@ -209,7 +209,7 @@ class Acl_User {
 			return false;
 		} else {
 			$user = $users->current();
-			
+
 			if ($user->password !== static::add_salt($password)) {
 				return false;
 			}

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Fuel
  *
@@ -50,8 +51,10 @@ class Acl {
 	 * @access public
 	 * @see \Hybrid\Acl::_init()
 	 */
-	public function __construct() { }
-	
+	public function __construct() {
+		
+	}
+
 	/**
 	 * Debug \Hybrid\Acl private property in case of any problem, will be removed once 
 	 * everything running great
@@ -103,7 +106,7 @@ class Acl {
 
 		return false;
 	}
-	
+
 	/**
 	 * Verify is current user has sufficient roles to access the resources based 
 	 * on available type of access.
@@ -116,7 +119,7 @@ class Acl {
 	 * @see \Hybrid\Acl::access()
 	 */
 	public static function access_status($resource, $type = 'view') {
-		
+
 		switch (static::access($resource, $type)) {
 			case true :
 				\Output::$status = 200;
@@ -146,7 +149,7 @@ class Acl {
 
 		foreach ($user->roles as $role) {
 			$role = \Inflector::friendly_title($role, '-', TRUE);
-			
+
 			foreach ($check_roles as $check_against) {
 				if ($role == $check_against) {
 					return true;
@@ -156,7 +159,7 @@ class Acl {
 
 		return false;
 	}
-	
+
 	/**
 	 * Add new user roles to the this instance
 	 * 
@@ -251,7 +254,7 @@ class Acl {
 				static::$acl[$id] = $type;
 			}
 		}
-		
+
 		return true;
 	}
 
