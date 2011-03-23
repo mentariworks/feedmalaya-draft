@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Fuel
  *
@@ -12,7 +13,6 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Hybrid;
 
 /**
@@ -20,14 +20,13 @@ namespace Hybrid;
  * affecting the standard workflow when the application doesn't actually 
  * utilize Hybrid feature.
  */
-
 abstract class Controller_Template extends \Fuel\Core\Controller_Template {
-	
+
 	public $template = 'themes/default';
-	
+
 	final protected function _acl($resource, $type = null) {
 		\Hybrid\Acl::access_status($resource, $type);
-		
+
 		switch (\Output::$status) {
 			case 401 :
 				\Request::show_404();
@@ -38,51 +37,41 @@ abstract class Controller_Template extends \Fuel\Core\Controller_Template {
 	public function before() {
 		$this->language = \Hybrid\Factory::get_language();
 		$this->user = \Hybrid\Acl_User::get();
-		
+
 		$file = \Config::get('app.template');
 		if (is_file(APPPATH . 'views/themes/' . $file . '.php')) {
 			$this->template = 'themes/' . $file;
 		}
 
-		
+
 		parent::before();
 
-		$this->template->content ='hello';
-
 		//TODO: change this to action or method name
-			$this->template->title = '';
+		$this->template->title = '';
 
-			$head['title'] = '';
-		  $this->template->head =  Factory::view('layout/head', $head);
-		
-			$this->template->navigation = Factory::view('layout/navigation');
+		$head['title'] = '';
+		$this->template->head = Factory::view('layout/head', $head);
 
-			$header['title'] = 'My Title';
-			$this->template->header = Factory::view('layout/header', $header);
+		$this->template->navigation = Factory::view('layout/navigation');
 
-			$sidebar['sidebar'] = '';
-			$this->template->sidebar = Factory::view('layout/sidebar', $sidebar);
-	
-			$this->template->facebook_script = Factory::view('layout/facebook_script');
+		$header['title'] = 'My Title';
+		$this->template->header = Factory::view('layout/header', $header);
 
-			$this->template->ganalytic_script = Factory::view('layout/ganalytic_script');
+		$sidebar['sidebar'] = '';
+		$this->template->sidebar = Factory::view('layout/sidebar', $sidebar);
 
-			$this->template->content = '';
+		$this->template->facebook_script = Factory::view('layout/facebook_script');
 
+		$this->template->ganalytic_script = Factory::view('layout/ganalytic_script');
+
+		$this->template->content = '';
 	}
-	
+
 	public function after() {
 		//we dont want to accidentally change our site_name
 		$this->template->site_name = \Config::get('app.site_name');
-
-
-
-
-
-
 		
-
 		parent::after();
 	}
-	
+
 }
