@@ -1,35 +1,38 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-<head>
-	<meta charset="utf-8">
-	<title><?php echo $title; ?></title>
-	<?php \Asset::add_path('public/assets'); ?>
-	<?php echo \Asset::js('jquery-1.5.1.min.js'); ?>
-	<style type="text/css">
-		* { margin: 0; padding: 0; }
-		body { background-color: #EEE; font-family: sans-serif; font-size: 16px; line-height: 20px; margin: 40px; }
-		#wrapper { padding: 30px; background: #fff; color: #333; margin: 0 auto; width: 600px; }
-		a { color: #36428D; }
-		h1 { color: #000; font-size: 55px; padding: 0 0 25px; line-height: 1em; }
-		.intro { font-size: 22px; line-height: 30px; font-family: georgia, serif; color: #555; padding: 29px 0 20px; border-top: 1px solid #CCC; }
-		h2 { margin: 50px 0 15px; padding: 0 0 10px; font-size: 18px; border-bottom: 1px dashed #ccc; }
-		h2.first { margin: 10px 0 15px; }
-		p { margin: 0 0 15px; line-height: 22px;}
-		a { color: #666; }
-		pre { border-left: 1px solid #ddd; line-height:20px; margin:20px; padding-left:1em; font-size: 16px; }
-		pre, code { color:#137F80; font-family: Courier, monospace; }
-		ul { margin: 15px 30px; }
-		li { line-height: 24px;}
-		.footer { color: #777; font-size: 12px; margin: 40px 0 0 0; }
-	</style>
-</head>
-<body>
-	<div id="wrapper">
-		<div id="content"><?php echo $content; ?></div>
+	<head>
+		<?php echo $head; ?>
+	</head>
+	<body>
+		<div id="wrapper">
+			<div id="navigation">
 
-		<p class="footer">
-			<a href="http://fuelphp.com">Fuel PHP</a> is released under the MIT license.<br />Page rendered in {exec_time}s using {mem_usage}mb of memory.
-		</p>
+							<?php echo $navigation; ?>
+			</div>
+			
+			<div id="header">
+				<?php echo $header; ?>
+			</div>
+			
+		<div id="content">
+			<?php echo $content; ?>
+		</div>
+		
+		<div id="sidebar">
+			<?php echo $sidebar; ?>
+		</div>
+		
+		<div class="clear"></div>
+		
+	</div><!-- End Wrapper -->
+	
+	<div id="footer"><!-- Begin footer -->
+		<div id="footer-content">
+			<p>Created <em>by</em> Malaysian, <em>for</em> Malaysian.
+		</div>
 	</div>
-</body>
+		
+<?php echo $facebook_script; ?>
+<?php echo $ganalytic_script; ?>
+	</body>
 </html>
