@@ -33,7 +33,6 @@ class View extends \Fuel\Core\View {
 	 * @throws  View_Exception
 	 */
 	public function set_filename($file) {
-		var_dump(static::$_path, $file, '.php', false, false);
 		switch (true) {
 			case ($path = $this->_find_file($file)) :
 				break;

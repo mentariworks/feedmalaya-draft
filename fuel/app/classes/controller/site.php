@@ -1,6 +1,6 @@
 <?php
 
-class Controller_Site extends Controller_Frontend {
+class Controller_Site extends \Hybrid\Controller_Frontend {
 	
 	public function action_index() {
 		$this->template->title = 'Something';
