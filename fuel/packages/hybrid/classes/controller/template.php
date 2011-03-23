@@ -40,17 +40,48 @@ abstract class Controller_Template extends \Fuel\Core\Controller_Template {
 		$this->user = \Hybrid\Acl_User::get();
 		
 		$file = \Config::get('app.template');
-
 		if (is_file(APPPATH . 'views/themes/' . $file . '.php')) {
 			$this->template = 'themes/' . $file;
 		}
+
 		
 		parent::before();
+
+		$this->template->content ='hello';
+
+		//TODO: change this to action or method name
+			$this->template->title = '';
+
+			$head['title'] = '';
+		  $this->template->head =  Factory::view('layout/head', $head);
+		
+			$this->template->navigation = Factory::view('layout/navigation');
+
+			$header['title'] = 'My Title';
+			$this->template->header = Factory::view('layout/header', $header);
+
+			$sidebar['sidebar'] = '';
+			$this->template->sidebar = Factory::view('layout/sidebar', $sidebar);
+	
+			$this->template->facebook_script = Factory::view('layout/facebook_script');
+
+			$this->template->ganalytic_script = Factory::view('layout/ganalytic_script');
+
+			$this->template->content = '';
+
 	}
 	
 	public function after() {
+		//we dont want to accidentally change our site_name
 		$this->template->site_name = \Config::get('app.site_name');
+
+
+
+
+
+
 		
+
 		parent::after();
 	}
 	
