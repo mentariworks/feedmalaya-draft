@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Fuel
  *
@@ -35,7 +36,15 @@ abstract class Controller extends \Fuel\Core\Controller {
 		$this->language = \Hybrid\Factory::get_language();
 		$this->user = \Hybrid\Acl_User::get();
 
-		parent::before();
+		\Event::trigger('controller_before');
+
+		return parent::before();
+	}
+
+	public function after() {
+		\Event::trigger('controller_after');
+
+		return parent::after();
 	}
 
 }

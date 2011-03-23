@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Fuel
  *
@@ -38,38 +37,25 @@ abstract class Controller_Template extends \Fuel\Core\Controller_Template {
 		$this->language = \Hybrid\Factory::get_language();
 		$this->user = \Hybrid\Acl_User::get();
 
+		\Event::trigger('controller_before');
+		
 		$file = \Config::get('app.template');
+
 		if (is_file(APPPATH . 'views/themes/' . $file . '.php')) {
 			$this->template = 'themes/' . $file;
 		}
 
 
-		parent::before();
-
-		//TODO: change this to action or method name
-		$this->template->title = '';
-
-		$head['title'] = '';
-		$this->template->head = Factory::view('layout/head', $head);
-
-		$this->template->navigation = Factory::view('layout/navigation');
-
-		$header['title'] = 'My Title';
-		$this->template->header = Factory::view('layout/header', $header);
-
-		$sidebar['sidebar'] = '';
-		$this->template->sidebar = Factory::view('layout/sidebar', $sidebar);
-
-		$this->template->facebook_script = Factory::view('layout/facebook_script');
-
-		$this->template->content = '';
+		return parent::before();
 	}
 
 	public function after() {
 		//we dont want to accidentally change our site_name
 		$this->template->site_name = \Config::get('app.site_name');
 		
-		parent::after();
+		\Event::trigger('controller_after');
+		
+		return parent::after();
 	}
 
 }

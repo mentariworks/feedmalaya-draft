@@ -40,11 +40,19 @@ abstract class Controller_Rest extends \Fuel\Core\Controller_Rest {
 		$this->language = \Hybrid\Factory::get_language();
 		$this->user = \Hybrid\Acl_User::get();
 		
+		\Event::trigger('controller_before');
+		
 		if (\Hybrid\Request::main() !== \Hybrid\Request::active()) {
 			$this->set_content_type = false;
 		}
 		
-		parent::before();
+		return parent::before();
+	}
+	
+	public function after() {
+		\Event::trigger('controller_after');
+		
+		return parent::after();
 	}
 	
 	/*
