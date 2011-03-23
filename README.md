@@ -2,6 +2,9 @@
 
 FeedMalaya is a social feed aggregator using FuelPHP, SimplePie and MySQL database.
 
+##License
+This project is license under GNU General Public License GPLv2 (or later) from the [http://www.fsf.org/](Free Software Foundation).
+
 ## Requirement
 
 * PHP 5.3.2
