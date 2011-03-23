@@ -32,7 +32,5 @@
 				<p>Created <em>by</em> Malaysian, <em>for</em> Malaysian.
 			</div>
 		</div>
-
-		<?php echo $facebook_script; ?>
 	</body>
 </html>
