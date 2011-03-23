@@ -62,8 +62,6 @@ abstract class Controller_Template extends \Fuel\Core\Controller_Template {
 
 		$this->template->facebook_script = Factory::view('layout/facebook_script');
 
-		$this->template->ganalytic_script = Factory::view('layout/ganalytic_script');
-
 		$this->template->content = '';
 	}
 
