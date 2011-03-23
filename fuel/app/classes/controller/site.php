@@ -1,9 +1,10 @@
 <?php
 
-class Controller_Site extends \Hybrid\Controller_Template {
+class Controller_Site extends Controller_Frontend {
 	
 	public function action_index() {
-		
+		$this->template->title = 'Something';
+		$this->template->content = 'Another thing';
 	}
 	
 	public function action_404() {
