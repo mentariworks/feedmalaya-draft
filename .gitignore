@@ -1,1 +1,13 @@
+*~
+*.bak
+Thumbs.db
+desktop.ini
+.DS_Store
+.buildpath
+.project
+.settings
 fuel/app/config/db.php
+fuel/app/logs/*/*/*
+fuel/app/cache/*/*
+nbproject/
+.idea
