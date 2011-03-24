@@ -2,12 +2,12 @@
 
 use \Factory;
 
-class Controller_Login extends \Hybrid\Controller_Template {
+class Controller_Login extends \Hybrid\Controller_Frontend {
 	
 	public function action_index() {
 		$title = __('title.login.index');
 		
-		$this->template->title = \Hybrid\Factory::title($title);
-		$this->template->content = \Hybrid\Factory::view('login/index');
+		$this->template->title = $title;
+		$this->template->content = \Hybrid\Factory::view('login/index')->render();
 	}
 }
