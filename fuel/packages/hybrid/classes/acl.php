@@ -39,6 +39,16 @@ class Acl {
 	$resources = array(),
 	$acl = array(),
 	$type = array('deny', 'view', 'create', 'edit', 'delete', 'all');
+	
+	/**
+	 * Only called once 
+	 * 
+	 * @static 
+	 * @access public
+	 */
+	public static function _init() {
+		\Event::trigger('init_acl');
+	}
 
 	/**
 	 * Construct and initiate static::_init method as an object
@@ -49,21 +59,9 @@ class Acl {
 	 * $role->add_resources('hello-world');</code>
 	 * 
 	 * @access public
-	 * @see \Hybrid\Acl::_init()
 	 */
 	public function __construct() {
 		
-	}
-
-	/**
-	 * Debug \Hybrid\Acl private property in case of any problem, will be removed once 
-	 * everything running great
-	 * 
-	 * @static
-	 * @access public
-	 */
-	public static function debug() {
-		\Debug::dump(static::$roles, static::$acl, static::$resources);
 	}
 
 	/**
