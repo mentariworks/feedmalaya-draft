@@ -12,7 +12,6 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 /**
@@ -20,9 +19,9 @@ namespace Fuel\Core;
  *
  * Helper for creating forms with support for creating dynamic form objects.
  *
- * @package        Fuel
- * @category    Core
- * @author        Dan Horrigan & Jelmer Schreuder
+ * @package		Fuel
+ * @category	Core
+ * @author		Dan Horrigan & Jelmer Schreuder
  */
 class Form {
 

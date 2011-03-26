@@ -12,16 +12,15 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 /**
  * Migrate Class
  *
- * @package        Fuel
- * @category    Migrations
- * @author        Phil Sturgeon
- * @link        http://fuelphp.com/docs/classes/migrate.html
+ * @package		Fuel
+ * @category	Migrations
+ * @author		Phil Sturgeon
+ * @link		http://fuelphp.com/docs/classes/migrate.html
  */
 class Migrate
 {

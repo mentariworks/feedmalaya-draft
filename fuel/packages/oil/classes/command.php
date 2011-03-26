@@ -12,16 +12,15 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Oil;
 
 /**
  * Oil\Cli Class
  *
- * @package        Fuel
- * @subpackage    Oil
- * @category    Core
- * @author        Phil Sturgeon
+ * @package		Fuel
+ * @subpackage	Oil
+ * @category	Core
+ * @author		Phil Sturgeon
  */
 class Command
 {
@@ -49,21 +48,21 @@ class Command
 				static::help();
 				return;
 			}
-			
+
 			switch ($args[1])
 			{
 				case 'g':
 				case 'generate':
 
 					$action = isset($args[2]) ? $args[2]: 'help';
-					
+
 					$subfolder = 'default';
 					if (is_int(strpos($action, 'scaffold/')))
 					{
 						$subfolder = str_replace('scaffold/', '', $action);
 						$action = 'scaffold';
 					}
-					
+
 					switch ($action)
 					{
 						case 'controller':
@@ -98,7 +97,7 @@ class Command
 					});
 
 					$task = isset($args[2]) ? $args[2] : null;
-					
+
 					call_user_func('Oil\Refine::run', $task, array_slice($args, 3));
 				break;
 
@@ -106,7 +105,7 @@ class Command
 				case 'package':
 
 					$action = isset($args[2]) ? $args[2]: 'help';
-					
+
 					switch ($action)
 					{
 						case 'install':
@@ -122,9 +121,11 @@ class Command
 
 				case 't':
 				case 'test':
-
+					// by right PHPUnit isn't loaded until bootstrap_phpunit is called
+					include_once('PHPUnit/Autoload.php');
+					
 					// Attempt to load PUPUnit.  If it fails, we are done.
-					if (!!\class_exists('PHPUnit_Framework_TestCase'))
+					if ( ! class_exists('PHPUnit_Framework_TestCase'))
 					{
 						throw new Exception('PHPUnit does not appear to be installed.'.PHP_EOL.PHP_EOL."\tPlease visit http://phpunit.de and install.");
 					}
@@ -136,9 +137,9 @@ class Command
 					\Cli::option('group') and $command .= ' --group '.\Cli::option('group');
 
 					passthru($command);
-				
+
 				break;
- 
+
 				default:
 
 					static::help();
@@ -155,7 +156,7 @@ class Command
 	public static function help()
 	{
 		echo <<<HELP
-   
+
 Usage:
   php oil [console|generate|help|test|package]
 
@@ -173,7 +174,7 @@ Documentation:
 
 HELP;
 
-    }
+	}
 }
 
 /* End of file oil/classes/cli.php */

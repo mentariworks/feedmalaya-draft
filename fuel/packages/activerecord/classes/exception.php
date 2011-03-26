@@ -12,18 +12,17 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace ActiveRecord;
 
 use Fuel;
 
 class Exception extends \Fuel_Exception {
-    const RecordNotFound = 0;
-    const AttributeNotFound = 1;
-    const UnexpectedClass = 2;
-    const ObjectFrozen = 3;
-    const HasManyThroughCantAssociateNewRecords = 4;
-    const MethodOrAssocationNotFound = 5;
+	const RecordNotFound = 0;
+	const AttributeNotFound = 1;
+	const UnexpectedClass = 2;
+	const ObjectFrozen = 3;
+	const HasManyThroughCantAssociateNewRecords = 4;
+	const MethodOrAssocationNotFound = 5;
 }
 
 

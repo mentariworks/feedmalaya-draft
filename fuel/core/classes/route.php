@@ -12,7 +12,6 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 class Route {

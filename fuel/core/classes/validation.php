@@ -12,7 +12,6 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 
@@ -24,10 +23,10 @@ namespace Fuel\Core;
  *
  * Static object to allow static usage of validation through singleton.
  *
- * @package        Fuel
- * @subpackage    Core
- * @category    Core
- * @author        Jelmer Schreuder
+ * @package		Fuel
+ * @subpackage	Core
+ * @category	Core
+ * @author		Jelmer Schreuder
  */
 class Validation {
 

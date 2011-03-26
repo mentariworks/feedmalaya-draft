@@ -12,7 +12,6 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 /**
@@ -23,27 +22,28 @@ namespace Fuel\Core;
  */
 class Tests_Uri extends TestCase {
 
-    /**
-     * Tests Uri::create()
-     * 
-     * @test
-     */
-    public function test_create()
-    {
-		$index_file = \Config::get('index_file');
+	/**
+	 * Tests Uri::create()
+	 * 
+	 * @test
+	 */
+	public function test_create()
+	{
+		$index_file = \Config::get('index_file', '');
 		
-		if (!empty($index_file)) {
-			$index_file .= '/';
+		if (!empty($index_file))
+		{
+			$index_file .= DS;
 		}
 		
-        $output = Uri::create('controller/method');
-        $expected = $index_file."controller/method";
-        $this->assertEquals($expected, $output);
+		$output = Uri::create('controller/method');
+		$expected = $index_file."controller/method";
+		$this->assertEquals($expected, $output);
 
-        $output = Uri::create('controller/:some', array('some' => 'thing', 'and' => 'more'), array('what' => ':and'));
-        $expected = $index_file."controller/thing?what=more";
-        $this->assertEquals($expected, $output);
-    }
+		$output = Uri::create('controller/:some', array('some' => 'thing', 'and' => 'more'), array('what' => ':and'));
+		$expected = $index_file."controller/thing?what=more";
+		$this->assertEquals($expected, $output);
+	}
 
 }
 

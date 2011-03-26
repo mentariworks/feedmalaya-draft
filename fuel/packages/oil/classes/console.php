@@ -12,16 +12,15 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Oil;
 
 /**
  * Oil\Console Class
  *
- * @package        Fuel
- * @subpackage    Oil
- * @category    Core
- * @author        Phil Sturgeon
+ * @package		Fuel
+ * @subpackage	Oil
+ * @category	Core
+ * @author		Phil Sturgeon
  */
 
 class Console {

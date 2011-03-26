@@ -24,10 +24,14 @@ class BelongsTo extends Relation {
 
 	public function __construct($from, $name, array $config)
 	{
+		$this->name        = $name;
 		$this->model_from  = $from;
 		$this->model_to    = array_key_exists('model_to', $config) ? $config['model_to'] : 'Model_'.\Inflector::classify($name);
 		$this->key_from    = array_key_exists('key_from', $config) ? (array) $config['key_from'] : (array) \Inflector::foreign_key($this->model_to);
 		$this->key_to      = array_key_exists('key_to', $config) ? (array) $config['key_to'] : $this->key_to;
+
+		$this->cascade_save    = array_key_exists('cascade_save', $config) ? $config['cascade_save'] : $this->cascade_save;
+		$this->cascade_delete  = array_key_exists('cascade_save', $config) ? $config['cascade_save'] : $this->cascade_delete;
 	}
 
 	public function get(Model $from)
@@ -76,6 +80,99 @@ class BelongsTo extends Relation {
 		}
 
 		return array($model);
+	}
+
+	public function save($model_from, $model_to, $original_model_id, $parent_saved, $cascade)
+	{
+		if ($parent_saved)
+		{
+			return;
+		}
+
+		$current_model_id = $model_to ? $model_to->implode_pk($model_to) : null;
+		// Check if there was another model assigned (this supersedes any change to the foreign key(s))
+		if ($current_model_id != $original_model_id)
+		{
+			// Save if it's a yet unsaved object
+			if ($model_to and $model_to->is_new())
+			{
+				$model_to->save(false);
+			}
+
+			// change the foreign keys in the model_from to point to the new relation
+			reset($this->key_to);
+			$model_from->unfreeze();
+			foreach ($this->key_to as $pk)
+			{
+				$model_from->{current($this->key_to)} = $model_to ? $model_to->{$pk} : null;
+				next($this->key_to);
+			}
+			$model_from->freeze();
+		}
+		// if not check the model_from's foreign_keys
+		else
+		{
+			if ($original_model_id === null)
+			{
+				if ( ! empty($model_to))
+				{
+					$model_from->unfreeze();
+					$rel = $model_from->_relate();
+					$rel[$this->name] = null;
+					$model_from->_relate($rel);
+					$model_from->freeze();
+				}
+			}
+			else
+			{
+				$foreign_keys = count($this->key_to) == 1 ? array($original_model_id) : explode('][', substr($original_model_id, 1, -1));
+				reset($this->key_from);
+				foreach ($foreign_keys as $fk)
+				{
+					// if any of the keys changed, reload the relationship - saving the object will save those keys
+					if ($model_from->{current($this->key_from)} != $fk)
+					{
+						// Attempt to load the new related object
+						$obj = call_user_func(array($this->model_to, find), $foreign_keys);
+						if (empty($object))
+						{
+							throw new Exception('New relation set on '.$this->model_from.' object wasn\'t found.');
+						}
+
+						// Add the new relation to the model_from
+						$model_from->unfreeze();
+						$rel = $model_from->_relate();
+						$rel[$this->name] = $obj;
+						$model_from->_relate($rel);
+						$model_from->freeze();
+
+						// we can stop checking the foreign keys
+						break;
+					}
+					next($this->key_from);
+				}
+			}
+		}
+
+		$cascade = is_null($cascade) ? $this->cascade_save : (bool) $cascade;
+		if ($cascade and ! empty($model_to))
+		{
+			$model_to->save();
+		}
+	}
+
+	public function delete($model_from, $model_to, $parent_deleted, $cascade)
+	{
+		if ($parent_deleted)
+		{
+			return;
+		}
+
+		$cascade = is_null($cascade) ? $this->cascade_save : (bool) $cascade;
+		if ($cascade and ! empty($model_to))
+		{
+			$model_to->delete();
+		}
 	}
 }
 

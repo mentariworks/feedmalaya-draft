@@ -12,15 +12,14 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 /**
  * DBUtil Class
  *
- * @package        Fuel
- * @category    Core
- * @author        Dan Horrigan
+ * @package		Fuel
+ * @category	Core
+ * @author		Dan Horrigan
  */
 class DBUtil {
 

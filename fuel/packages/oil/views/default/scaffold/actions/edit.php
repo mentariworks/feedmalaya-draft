@@ -1,17 +1,17 @@
-        $<?php echo $singular; ?> = <?php echo $model; ?>::find($id);
+		$<?php echo $singular; ?> = <?php echo $model; ?>::find($id);
 
-        if ($_POST)
-        {
+		if ($_POST)
+		{
 <?php foreach ($fields as $field): ?>
-            $<?php echo $singular; ?>-><?php echo $field['name']; ?> = Input::post('<?php echo $field['name']; ?>');
+			$<?php echo $singular; ?>-><?php echo $field['name']; ?> = Input::post('<?php echo $field['name']; ?>');
 <?php endforeach; ?>
 
 			if ($<?php echo $singular; ?>->save())
 			{
 				Session::set_flash('notice', 'Updated <?php echo $singular; ?> #' . $<?php echo $singular; ?>->id);
 
-                Output::redirect('<?php echo $plural; ?>');
-            }
+				Response::redirect('<?php echo $plural; ?>');
+			}
 
 			else
 			{

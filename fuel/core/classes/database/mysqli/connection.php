@@ -15,64 +15,64 @@ namespace Fuel\Core;
 
 class Database_MySQLi_Connection extends \Database_Connection {
 
-    // Database in use by each connection
-    protected static $_current_databases = array();
+	// Database in use by each connection
+	protected static $_current_databases = array();
 
-    // Use SET NAMES to set the character set
-    protected static $_set_names;
+	// Use SET NAMES to set the character set
+	protected static $_set_names;
 
-    // Identifier for this connection within the PHP driver
-    protected $_connection_id;
+	// Identifier for this connection within the PHP driver
+	protected $_connection_id;
 
-    // MySQL uses a backtick for identifiers
-    protected $_identifier = '`';
-    
-    // Allows transactions
-    protected $_trans_enabled = FALSE;
-    
-    // transaction errors
-    public $trans_errors = FALSE;
+	// MySQL uses a backtick for identifiers
+	protected $_identifier = '`';
+	
+	// Allows transactions
+	protected $_trans_enabled = FALSE;
+	
+	// transaction errors
+	public $trans_errors = FALSE;
 
-    // Know which kind of DB is used
-    public $_db_type = 'mysql';
+	// Know which kind of DB is used
+	public $_db_type = 'mysql';
 
-    public function connect()
-    {
-        if ($this->_connection)
-            return;
+	public function connect()
+	{
+		if ($this->_connection)
+			return;
 
-        if (static::$_set_names === NULL)
-        {
-            // Determine if we can use mysqli_set_charset(), which is only
-            // available on PHP 5.2.3+ when compiled against MySQL 5.0+
-            static::$_set_names = ! function_exists('mysqli_set_charset');
-        }
+		if (static::$_set_names === NULL)
+		{
+			// Determine if we can use mysqli_set_charset(), which is only
+			// available on PHP 5.2.3+ when compiled against MySQL 5.0+
+			static::$_set_names = ! function_exists('mysqli_set_charset');
+		}
 
-        // Extract the connection parameters, adding required variables
-        extract($this->_config['connection'] + array(
-            'database'   => '',
-            'hostname'   => '',
-            'username'   => '',
-            'password'   => '',
-            'persistent' => FALSE,
-        ));
+		// Extract the connection parameters, adding required variables
+		extract($this->_config['connection'] + array(
+			'database'   => '',
+			'hostname'   => '',
+			'username'   => '',
+			'password'   => '',
+			'persistent' => FALSE,
+		));
 
-        // Prevent this information from showing up in traces
-        unset($this->_config['connection']['username'], $this->_config['connection']['password']);
+		// Prevent this information from showing up in traces
+		unset($this->_config['connection']['username'], $this->_config['connection']['password']);
 
-        try
-        {
-            if ($persistent)
-            {
-                // Create a persistent connection
-                $this->_connection =  new \mysqli('p:'.$hostname, $username, $password, $database);
-            }
-            else
-            {
-                // Create a connection and force it to be a new link
-                $this->_connection = new \mysqli($hostname, $username, $password, $database);
-            }
-            if ($this->_connection->error)
+		try
+		{
+			if ($persistent)
+			{
+				// Create a persistent connection
+				$this->_connection =  new \mysqli('p:'.$hostname, $username, $password, $database);
+			}
+			else
+			{
+				// Create a connection and force it to be a new link
+				$this->_connection = new \mysqli($hostname, $username, $password, $database);
+			}
+			if ($this->_connection->error)
       {
         // Unable to connect, select database, etc
         throw new \Database_Exception($this->_connection->error, $this->_connection->errno);

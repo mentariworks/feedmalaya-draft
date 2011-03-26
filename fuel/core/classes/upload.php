@@ -12,16 +12,15 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 /**
  * Upload Class
  *
- * @package        Fuel
- * @category    Core
- * @author        Harro "WanWizard" Verton
- * @link        http://fuelphp.com/docs/classes/upload.html
+ * @package		Fuel
+ * @category	Core
+ * @author		Harro "WanWizard" Verton
+ * @link		http://fuelphp.com/docs/classes/upload.html
  */
 class Upload {
 
@@ -431,7 +430,7 @@ class Upload {
 		// anything to save?
 		if (empty($files))
 		{
-			throw new \Fuel_Exception('No uploaded files are selected.');
+			throw new Exception('No uploaded files are selected.');
 		}
 
 		// make sure we have a valid path
@@ -444,7 +443,7 @@ class Upload {
 		}
 		if ( ! is_dir($path))
 		{
-			throw new \Fuel_Exception('Can\'t move the uploaded file. Destination path specified does not exist.');
+			throw new Exception('Can\'t move the uploaded file. Destination path specified does not exist.');
 		}
 
 		// now that we have a path, let's save the files

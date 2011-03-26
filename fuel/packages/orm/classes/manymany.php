@@ -42,10 +42,14 @@ class ManyMany extends Relation {
 
 	public function __construct($from, $name, array $config)
 	{
+		$this->name        = $name;
 		$this->model_from  = $from;
 		$this->model_to    = array_key_exists('model_to', $config) ? $config['model_to'] : 'Model_'.\Inflector::classify($name);
 		$this->key_from    = array_key_exists('key_from', $config) ? (array) $config['key_from'] : $this->key_from;
 		$this->key_to      = array_key_exists('key_to', $config) ? (array) $config['key_to'] : $this->key_to;
+
+		$this->cascade_save    = array_key_exists('cascade_save', $config) ? $config['cascade_save'] : $this->cascade_save;
+		$this->cascade_delete  = array_key_exists('cascade_save', $config) ? $config['cascade_save'] : $this->cascade_delete;
 
 		// Allow for many-many through another object...
 		if ( ! empty($config['through']['model']))
@@ -167,6 +171,40 @@ class ManyMany extends Relation {
 		}
 
 		return $models;
+	}
+
+	public function save($model_from, $model_to, $original_model_to, $parent_saved, $cascade)
+	{
+		if ( ! $parent_saved)
+		{
+			return;
+		}
+
+		$cascade = is_null($cascade) ? $this->cascade_save : (bool) $cascade;
+		if ($cascade)
+		{
+			foreach ($model_to as $m)
+			{
+				$m->save();
+			}
+		}
+	}
+
+	public function delete($model_from, $model_to, $parent_deleted, $cascade)
+	{
+		if ( ! $parent_deleted)
+		{
+			return;
+		}
+
+		$cascade = is_null($cascade) ? $this->cascade_save : (bool) $cascade;
+		if ($cascade)
+		{
+			foreach ($model_to as $m)
+			{
+				$m->delete();
+			}
+		}
 	}
 }
 

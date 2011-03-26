@@ -12,7 +12,6 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 /**
@@ -20,12 +19,12 @@ namespace Fuel\Core;
  *
  * Help convert between various formats such as XML, JSON, CSV, etc.
  *
- * @package        Fuel
- * @category    Core
- * @author        Phil Sturgeon - Fuel Development Team
- * @copyright    (c) 2008-2010 Kohana Team
- * @copyright    2010 - 2011 Fuel Development Team
- * @link        http://fuelphp.com/docs/classes/format.html
+ * @package		Fuel
+ * @category	Core
+ * @author		Phil Sturgeon - Fuel Development Team
+ * @copyright	(c) 2008-2010 Kohana Team
+ * @copyright	2010 - 2011 Fuel Development Team
+ * @link		http://fuelphp.com/docs/classes/format.html
  */
 class Format {
 
@@ -168,21 +167,21 @@ class Format {
 //			$headings = array_keys($data[0]);
 //		}
 //
-//        // Single array
-//        else
-//        {
-//            $headings = array_keys($data);
-//            $data = array($data);
-//        }
+//		// Single array
+//		else
+//		{
+//			$headings = array_keys($data);
+//			$data = array($data);
+//		}
 //
-//        $this->load->library('table');
+//		$this->load->library('table');
 //
-//        $this->table->set_heading($headings);
+//		$this->table->set_heading($headings);
 //
-//        foreach ($data as &$row)
-//        {
-//            $this->table->add_row($row);
-//        }
+//		foreach ($data as &$row)
+//		{
+//			$this->table->add_row($row);
+//		}
 //
 //		return $this->table->generate();
 //	}

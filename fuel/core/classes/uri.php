@@ -12,16 +12,15 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 /**
  * Uri Class
  *
- * @package        Fuel
- * @category    Core
- * @author        Dan Horrigan
- * @link        http://fuelphp.com/docs/classes/uri.html
+ * @package		Fuel
+ * @category	Core
+ * @author		Dan Horrigan
+ * @link		http://fuelphp.com/docs/classes/uri.html
  */
 class Uri {
 

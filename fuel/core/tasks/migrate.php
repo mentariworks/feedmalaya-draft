@@ -12,7 +12,6 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Tasks;
 
 /**
@@ -20,10 +19,10 @@ namespace Fuel\Tasks;
  *
  * Use this command line task to deploy and rollback changes.
  *
- * @package        Fuel
- * @version        1.0
- * @author        Phil Sturgeon
- * @link        http://fuelphp.com/docs/general/migrations.html
+ * @package		Fuel
+ * @version		1.0
+ * @author		Phil Sturgeon
+ * @link		http://fuelphp.com/docs/general/migrations.html
  */
 
 class Migrate {
@@ -167,7 +166,7 @@ Examples:
 
 HELP;
 
-    }
+	}
 }
 
 /* End of file tasks/migrate.php */

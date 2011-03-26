@@ -17,10 +17,10 @@ namespace Fuel\Core;
 /**
  * Some of this code was written by Flinn Mueller.
  *
- * @package        Fuel
- * @category    Core
- * @copyright    Flinn Mueller
- * @link        http://fuelphp.com/docs/classes/inlector.html
+ * @package		Fuel
+ * @category	Core
+ * @copyright	Flinn Mueller
+ * @link		http://fuelphp.com/docs/classes/inlector.html
  */
 class Inflector {
 
@@ -184,7 +184,7 @@ class Inflector {
 	 */
 	public static function camelize($underscored_word)
 	{
-		return preg_replace('/(^|_)(.)/e', "strtoupper('\\2')", strval($underscored_word));
+		return preg_replace('/(^|_)(.)/e', "strtoupper('\\1\\2')", strval($underscored_word));
 	}
 
 	/**

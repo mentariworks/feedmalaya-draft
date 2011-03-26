@@ -12,7 +12,6 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace ActiveRecord;
 
 
@@ -127,7 +126,7 @@ class Model {
 		{
 			return;
 		}
-		
+
 		// Start with count_by? Get counting!
 		if (strpos($name, 'count_by') === 0)
 		{
@@ -297,7 +296,11 @@ class Model {
 	 *
 	 * @var	array	the types
 	 */
-	private $assoc_types = array('belongs_to', 'has_many', 'has_one');
+	private $assoc_types = array(
+		'belongs_to' => 'ActiveRecord\\BelongsTo',
+		'has_many'   => 'ActiveRecord\\HasMany',
+		'has_one'    => 'ActiveRecord\\HasOne'
+	);
 
 	/**
 	 * The factory takes $params and returns a new instance.
@@ -338,19 +341,17 @@ class Model {
 
 		$this->prefixed_table_name = \DB::table_prefix($this->table_name);
 
-		//don't process associacions when instance was created by static::count() 
+		//don't process associacions when instance was created by static::count()
 		if ($params === self::IS_COUNT)
 		{
 			return;
 		}
 
 		// Setup all the associations
-		foreach ($this->assoc_types as $type)
+		foreach ($this->assoc_types as $type => $class_name)
 		{
 			if (isset($this->{$type}))
 			{
-				$class_name = 'ActiveRecord\\'.Inflector::classify($type);
-
 				foreach ($this->{$type} as $key => $assoc)
 				{
 					/* handle association sent in as array with options */
@@ -1159,9 +1160,9 @@ class Model {
 
 		return array('result' => $result, 'column_lookup' => $column_lookup);
 	}
-	
+
 	/**
-	 * Exactly as find() but returns the row count see {@link find} 
+	 * Exactly as find() but returns the row count see {@link find}
 	 * all the parameters and options are exactly the same as for find()
 	 *
 	 * Usage:
@@ -1180,7 +1181,7 @@ class Model {
 
 		return $count;
 	}
-	
+
 	/**
 	 * Generates then executes the count query.  This is used by {@link count}.
 	 * Please see {@link count} for parameter options and usage.
@@ -1193,7 +1194,7 @@ class Model {
 	{
 		// Start building the query
 		$query = DB::select(DB::expr('COUNT('.$this->prefixed_table_name.'.'.$this->primary_key.') AS count_result'));
-	
+
 		$query->from($this->table_name);
 
 		// Get the group
@@ -1220,7 +1221,7 @@ class Model {
 
 		// It's all built, now lets execute
 		$count = $query->execute()->get('count_result');
-		
+
 		// Database_Result::get('mycount') returns a string | null
 		if ($count === null)
 		{

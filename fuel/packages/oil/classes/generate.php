@@ -12,48 +12,45 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Oil;
 
 /**
  * Oil\Generate Class
  *
- * @package        Fuel
- * @subpackage    Oil
- * @category    Core
- * @author        Phil Sturgeon
+ * @package		Fuel
+ * @subpackage	Oil
+ * @category	Core
+ * @author		Phil Sturgeon
  */
 class Generate
 {
-    public static $create_folders = array();
-    public static $create_files = array();
+	public static $create_folders = array();
+	public static $create_files = array();
 
-    public static $scaffolding = false;
+	public static $scaffolding = false;
 
-    private static $_default_constraints = array(
-        'varchar' => 255,
-        'char' => 255,
-        'int' => 11
-    );
+	private static $_default_constraints = array(
+		'varchar' => 255,
+		'char' => 255,
+		'int' => 11
+	);
 
 	public static function controller($args, $build = true)
 	{
 		$args = self::_clear_args($args);
 		$singular = strtolower(array_shift($args));
 		$actions = $args;
-		
-		$filename = str_replace('_', '/', $singular);
 
-		$filepath = APPPATH . 'classes/controller/' . $filename .'.php';
+		$filepath = APPPATH . 'classes/controller/' . $singular .'.php';
 
-        // Uppercase each part of the class name and remove hyphens
-        $class_name = static::class_name($singular);
+		// Uppercase each part of the class name and remove hyphens
+		$class_name = static::class_name($singular);
 
-        // Stick "blogs" to the start of the array
-        array_unshift($args, $singular);
+		// Stick "blogs" to the start of the array
+		array_unshift($args, $singular);
 
-        // Create views folder and each view file
-        static::views($args, false);
+		// Create views folder and each view file
+		static::views($args, false);
 
        $actions or $actions = array('index');
 
@@ -76,57 +73,55 @@ class Controller_{$class_name} extends Controller_Template {
 {$action_str}
 }
 
-/* End of file $filename.php */
+/* End of file $singular.php */
 CONTROLLER;
 
-        // Write controller
-        static::create($filepath, $controller, 'controller');
-        $build and static::build();
-    }
+		// Write controller
+		static::create($filepath, $controller, 'controller');
+		$build and static::build();
+	}
 
 
-    public static function model($args, $build = true)
-    {
-        $singular = strtolower(array_shift($args));
+	public static function model($args, $build = true)
+	{
+		$singular = strtolower(array_shift($args));
 
-        if (empty($args))
-        {
-            throw new Exception('No fields have been provided, the model will not know how to build the table.');
-        }
+		if (empty($args))
+		{
+			throw new Exception('No fields have been provided, the model will not know how to build the table.');
+		}
 
-        $plural = \Inflector::pluralize($singular);
+		$plural = \Inflector::pluralize($singular);
 
-		$filename = str_replace('_', '/', $singular);
+		$filepath = APPPATH . 'classes/model/' . str_replace('_', '/', $singular) .'.php';
 
-		$filepath = APPPATH . 'classes/model/' . $filename .'.php';
+		// Uppercase each part of the class name and remove hyphens
+		$class_name = static::class_name($singular);
 
-        // Uppercase each part of the class name and remove hyphens
-        $class_name = static::class_name($singular);
-
-        $model = <<<MODEL
+		$model = <<<MODEL
 <?php
 
 class Model_{$class_name} extends Orm\Model { }
 
-/* End of file $filename.php */
+/* End of file $singular.php */
 MODEL;
 
-        // Build the model
-        static::create($filepath, $model, 'model');
+		// Build the model
+		static::create($filepath, $model, 'model');
 
-        if ( ! empty($args))
-        {
-            array_unshift($args, 'create_'.$plural);
-            static::migration($args, false);
-        }
+		if ( ! empty($args))
+		{
+			array_unshift($args, 'create_'.$plural);
+			static::migration($args, false);
+		}
 
-        else
-        {
-            throw new Exception('Not enough arguments to create this migration.');
-        }
+		else
+		{
+			throw new Exception('Not enough arguments to create this migration.');
+		}
 
-        $build and static::build();
-    }
+		$build and static::build();
+	}
 
 
 	public static function views($args, $build = true)
@@ -349,27 +344,27 @@ class {$migration_name} {
 	public function up()
 	{
 {$up}
-    }
+	}
 
 	public function down()
 	{
 {$down}
-    }
+	}
 }
 MIGRATION;
 
-        $number = isset($number) ? $number : static::_find_migration_number();
-        $filepath = APPPATH . 'migrations/'.$number.'_' . strtolower($migration_name) . '.php';
+		$number = isset($number) ? $number : static::_find_migration_number();
+		$filepath = APPPATH . 'migrations/'.$number.'_' . strtolower($migration_name) . '.php';
 
-        static::create($filepath, $migration, 'migration');
+		static::create($filepath, $migration, 'migration');
 
-        $build and static::build();
-    }
+		$build and static::build();
+	}
 
 
-    public static function help()
-    {
-        $output = <<<HELP
+	public static function help()
+	{
+		$output = <<<HELP
 Usage:
   php oil [g|generate] [controller|model|migration|scaffold|views] [options]
 

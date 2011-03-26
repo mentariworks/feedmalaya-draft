@@ -230,7 +230,7 @@ class Database_Query {
 			Kohana::cache($cache_key, $result->as_array(), $this->_lifetime);
 		}
 */
-        return $result;
-    }
+		return $result;
+	}
 
 } // End Database_Query

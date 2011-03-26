@@ -12,22 +12,21 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 
 
 class Cache_Handler_Serialized implements Cache_Handler_Driver {
 
-    public function readable($contents)
-    {
-        return unserialize($contents);
-    }
+	public function readable($contents)
+	{
+		return unserialize($contents);
+	}
 
-    public function writable($contents)
-    {
-        return serialize($contents);
-    }
+	public function writable($contents)
+	{
+		return serialize($contents);
+	}
 
 }
 

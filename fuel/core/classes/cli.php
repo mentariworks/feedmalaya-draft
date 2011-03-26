@@ -12,7 +12,6 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 /**
@@ -20,106 +19,106 @@ namespace Fuel\Core;
  *
  * Interact with the command line by accepting input options, parameters and output text
  *
- * @package        Fuel
- * @category    Core
- * @author        Phil Sturgeon
- * @link        http://fuelphp.com/docs/classes/cli.html
+ * @package		Fuel
+ * @category	Core
+ * @author		Phil Sturgeon
+ * @link		http://fuelphp.com/docs/classes/cli.html
  */
 class Cli {
 
-    public static $readline_support = false;
+	public static $readline_support = false;
 
-    public static $wait_msg = 'Press any key to continue...';
+	public static $wait_msg = 'Press any key to continue...';
 
-    protected static $args = array();
+	protected static $args = array();
 
-    protected static $foreground_colors = array(
-        'black'            => '0;30',
-        'dark_gray'        => '1;30',
-        'blue'            => '0;34',
-        'light_blue'    => '1;34',
-        'green'            => '0;32',
-        'light_green'    => '1;32',
-        'cyan'            => '0;36',
-        'light_cyan'    => '1;36',
-        'red'            => '0;31',
-        'light_red'        => '1;31',
-        'purple'        => '0;35',
-        'light_purple'    => '1;35',
-        'brown'            => '0;33',
-        'yellow'        => '1;33',
-        'light_gray'    => '0;37',
-        'white'            => '1;37',
-    );
+	protected static $foreground_colors = array(
+		'black'			=> '0;30',
+		'dark_gray'		=> '1;30',
+		'blue'			=> '0;34',
+		'light_blue'	=> '1;34',
+		'green'			=> '0;32',
+		'light_green'	=> '1;32',
+		'cyan'			=> '0;36',
+		'light_cyan'	=> '1;36',
+		'red'			=> '0;31',
+		'light_red'		=> '1;31',
+		'purple'		=> '0;35',
+		'light_purple'	=> '1;35',
+		'brown'			=> '0;33',
+		'yellow'		=> '1;33',
+		'light_gray'	=> '0;37',
+		'white'			=> '1;37',
+	);
 
-    protected static $background_colors = array(
-        'black'            => '40',
-        'red'            => '41',
-        'green'            => '42',
-        'yellow'        => '43',
-        'blue'            => '44',
-        'magenta'        => '45',
-        'cyan'            => '46',
-        'light_gray'    => '47',
-    );
+	protected static $background_colors = array(
+		'black'			=> '40',
+		'red'			=> '41',
+		'green'			=> '42',
+		'yellow'		=> '43',
+		'blue'			=> '44',
+		'magenta'		=> '45',
+		'cyan'			=> '46',
+		'light_gray'	=> '47',
+	);
 
-    /**
-     * Static constructor.    Parses all the CLI params.
-     */
-    public static function _init()
-    {
-        if ( ! \Fuel::$is_cli)
-        {
-            throw new Exception('Cli class cannot be used outside of the command line.');
-        }
-        for ($i = 1; $i < $_SERVER['argc']; $i++)
-        {
-            $arg = explode('=', $_SERVER['argv'][$i]);
+	/**
+	 * Static constructor.	Parses all the CLI params.
+	 */
+	public static function _init()
+	{
+		if ( ! \Fuel::$is_cli)
+		{
+			throw new Exception('Cli class cannot be used outside of the command line.');
+		}
+		for ($i = 1; $i < $_SERVER['argc']; $i++)
+		{
+			$arg = explode('=', $_SERVER['argv'][$i]);
 
-            static::$args[$i] = $arg[0];
+			static::$args[$i] = $arg[0];
 
-            if (count($arg) > 1 || strncmp($arg[0], '-', 1) === 0)
-            {
-                static::$args[ltrim($arg[0], '-')] = isset($arg[1]) ? $arg[1] : true;
-            }
-        }
+			if (count($arg) > 1 || strncmp($arg[0], '-', 1) === 0)
+			{
+				static::$args[ltrim($arg[0], '-')] = isset($arg[1]) ? $arg[1] : true;
+			}
+		}
 
-        // Readline is an extension for PHP that makes interactive with PHP much more bash-like
-        // http://www.php.net/manual/en/readline.installation.php
-        static::$readline_support = extension_loaded('readline');
-    }
+		// Readline is an extension for PHP that makes interactive with PHP much more bash-like
+		// http://www.php.net/manual/en/readline.installation.php
+		static::$readline_support = extension_loaded('readline');
+	}
 
-    /**
-     * Returns the option with the given name.    You can also give the option
-     * number.
-     *
-     * Named options must be in the following formats:
-     * php index.php user -v --v -name=John --name=John
-     *
-     * @param    string|int    $name    the name of the option (int if unnamed)
-     * @return    string
-     */
-    public static function option($name, $default = null)
-    {
-        if ( ! isset(static::$args[$name]))
-        {
-            return $default;
-        }
-        return static::$args[$name];
-    }
+	/**
+	 * Returns the option with the given name.	You can also give the option
+	 * number.
+	 *
+	 * Named options must be in the following formats:
+	 * php index.php user -v --v -name=John --name=John
+	 *
+	 * @param	string|int	$name	the name of the option (int if unnamed)
+	 * @return	string
+	 */
+	public static function option($name, $default = null)
+	{
+		if ( ! isset(static::$args[$name]))
+		{
+			return $default;
+		}
+		return static::$args[$name];
+	}
 
-    
-    /**
-     * Get input from the shell, using readline or the standard STDIN
-     *
-     * Named options must be in the following formats:
-     * php index.php user -v --v -name=John --name=John
-     *
-     * @param    string|int    $name    the name of the option (int if unnamed)
-     * @return    string
-     */
-    public static function input($prefix = '')
-    {
+	
+	/**
+	 * Get input from the shell, using readline or the standard STDIN
+	 *
+	 * Named options must be in the following formats:
+	 * php index.php user -v --v -name=John --name=John
+	 *
+	 * @param	string|int	$name	the name of the option (int if unnamed)
+	 * @return	string
+	 */
+	public static function input($prefix = '')
+	{
         if (static::$readline_support)
 		{
 			return readline($prefix);
@@ -352,64 +351,64 @@ class Cli {
 	{
         // Do it once or more, write with empty string gives us a new line
         for($i = 0; $i < $num; $i++)
-        {
-            static::write();
-        }
+		{
+			static::write();
+		}
     }
 
-    /**
-     * Clears the screen of output
-     *
-     * @return    void
-     */
+	/**
+	 * Clears the screen of output
+	 *
+	 * @return	void
+	 */
     function clear_screen()
     {
-        static::is_windows()
+		static::is_windows()
 
-            // Windows is a bit crap at this, but their terminal is tiny so shove this in
-            ? static::new_line(40)
+			// Windows is a bit crap at this, but their terminal is tiny so shove this in
+			? static::new_line(40)
 
-            // Anything with a flair of Unix will handle these magic characters
-            : fwrite(STDOUT, chr(27)."[H".chr(27)."[2J");
-    }
+			// Anything with a flair of Unix will handle these magic characters
+			: fwrite(STDOUT, chr(27)."[H".chr(27)."[2J");
+	}
 
-    /**
-     * Returns the given text with the correct color codes for a foreground and
-     * optionally a background color.
-     *
-     * @param    string    $text        the text to color
-     * @param    atring    $foreground the foreground color
-     * @param    string    $background the background color
-     * @return    string    the color coded string
-     */
-    public static function color($text, $foreground, $background = null)
-    {
-        if (static::is_windows())
-        {
-            return $text;
-        }
-        
-        if ( ! array_key_exists($foreground, static::$foreground_colors))
-        {
-            throw new \Fuel_Exception('Invalid CLI foreground color: '.$foreground);
-        }
+	/**
+	 * Returns the given text with the correct color codes for a foreground and
+	 * optionally a background color.
+	 *
+	 * @param	string	$text		the text to color
+	 * @param	atring	$foreground the foreground color
+	 * @param	string	$background the background color
+	 * @return	string	the color coded string
+	 */
+	public static function color($text, $foreground, $background = null)
+	{
+		if (static::is_windows())
+		{
+			return $text;
+		}
+		
+		if ( ! array_key_exists($foreground, static::$foreground_colors))
+		{
+			throw new \Fuel_Exception('Invalid CLI foreground color: '.$foreground);
+		}
 
-        if ( $background !== null and ! array_key_exists($background, static::$background_colors))
-        {
-            throw new \Fuel_Exception('Invalid CLI background color: '.$background);
-        }
+		if ( $background !== null and ! array_key_exists($background, static::$background_colors))
+		{
+			throw new \Fuel_Exception('Invalid CLI background color: '.$background);
+		}
 
-        $string = "\033[".static::$foreground_colors[$foreground]."m";
+		$string = "\033[".static::$foreground_colors[$foreground]."m";
 
-        if ($background !== null)
-        {
-            $string .= "\033[".static::$background_colors[$background]."m";
-        }
+		if ($background !== null)
+		{
+			$string .= "\033[".static::$background_colors[$background]."m";
+		}
 
-        $string .= $text."\033[0m";
+		$string .= $text."\033[0m";
 
-        return $string;
-    }
+		return $string;
+	}
 
 }
 

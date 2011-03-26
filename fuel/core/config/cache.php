@@ -14,14 +14,13 @@
 
 
 
-
 return array(
 
-    /**
-     * ----------------------------------------------------------------------
-     * global settings
-     * ----------------------------------------------------------------------
-     */
+	/**
+	 * ----------------------------------------------------------------------
+	 * global settings
+	 * ----------------------------------------------------------------------
+	 */
 
 	// default storage driver
 	'driver'      => 'file',
@@ -29,19 +28,19 @@ return array(
 	// default expiration (null = no expiration)
 	'expiration'  => null,
 
-    /**
-     * Default content handlers: convert values to strings to be stored
-     * You can set them per primitive type or object class like this:
-     *   - 'string_handler'         => 'string'
-     *   - 'array_handler'            => 'json'
-     *   - 'Some_Object_handler'    => 'serialize'
-     */
+	/**
+	 * Default content handlers: convert values to strings to be stored
+	 * You can set them per primitive type or object class like this:
+	 *   - 'string_handler' 		=> 'string'
+	 *   - 'array_handler'			=> 'json'
+	 *   - 'Some_Object_handler'	=> 'serialize'
+	 */
 
-    /**
-     * ----------------------------------------------------------------------
-     * storage driver settings
-     * ----------------------------------------------------------------------
-     */
+	/**
+	 * ----------------------------------------------------------------------
+	 * storage driver settings
+	 * ----------------------------------------------------------------------
+	 */
 
 	// specific configuration settings for the file driver
 	'file'  => array(

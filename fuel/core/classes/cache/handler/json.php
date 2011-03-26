@@ -12,35 +12,34 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 
 
 class Cache_Handler_Json implements Cache_Handler_Driver {
 
-    public function readable($contents)
-    {
-        $array = false;
-        if (substr($contents, 0, 1) == 'a')
-        {
-            $contents = substr($contents, 1);
-            $array = true;
-        }
+	public function readable($contents)
+	{
+		$array = false;
+		if (substr($contents, 0, 1) == 'a')
+		{
+			$contents = substr($contents, 1);
+			$array = true;
+		}
 
-        return json_decode($contents, $array);
-    }
+		return json_decode($contents, $array);
+	}
 
-    public function writable($contents)
-    {
-        $array = '';
-        if (is_array($contents))
-        {
-            $array = 'a';
-        }
+	public function writable($contents)
+	{
+		$array = '';
+		if (is_array($contents))
+		{
+			$array = 'a';
+		}
 
-        return $array.json_encode($contents);
-    }
+		return $array.json_encode($contents);
+	}
 }
 
 /* End of file json.php */

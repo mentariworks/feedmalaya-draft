@@ -12,16 +12,15 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Oil;
 
 /**
  * Oil\Package Class
  *
- * @package        Fuel
- * @subpackage    Oil
- * @category    Core
- * @author        Phil Sturgeon
+ * @package		Fuel
+ * @subpackage	Oil
+ * @category	Core
+ * @author		Phil Sturgeon
  */
 class Package
 {
@@ -124,79 +123,79 @@ Examples:
 Documentation:
   http://fuelphp.com/docs/packages/oil/package.html
 HELP;
-        \Cli::write($output);
+		\Cli::write($output);
 
-    }
+	}
 
 
-    private static function _use_git()
-    {
-        exec('which git', $output);
+	private static function _use_git()
+	{
+		exec('which git', $output);
 
-        // If this is a valid path to git, use it instead of just "git"
-        if (file_exists($line = trim(current($output))))
-        {
-            static::$git = $line;
-        }
+		// If this is a valid path to git, use it instead of just "git"
+		if (file_exists($line = trim(current($output))))
+		{
+			static::$git = $line;
+		}
 
-        unset($output);
+		unset($output);
 
-        // Double check git is installed (windows will fail step 1)
-        exec(static::$git . ' --version', $output);
+		// Double check git is installed (windows will fail step 1)
+		exec(static::$git . ' --version', $output);
 
-        preg_match('#^(git version)#', current($output), $matches);
+		preg_match('#^(git version)#', current($output), $matches);
 
-        // If we have a match, use Git!
-        return ! empty($matches[0]);
-    }
+		// If we have a match, use Git!
+		return ! empty($matches[0]);
+	}
 
-    private static function _download_package_zip($zip_url, $package, $version)
-    {
-        \Cli::write('Downloading package: ' . $zip_url);
+	private static function _download_package_zip($zip_url, $package, $version)
+	{
+		\Cli::write('Downloading package: ' . $zip_url);
 
-        // Make the folder so we can extract the ZIP to it
-        mkdir($tmp_folder = APPPATH . 'tmp/' . $package . '-' . time());
+		// Make the folder so we can extract the ZIP to it
+		mkdir($tmp_folder = APPPATH . 'tmp/' . $package . '-' . time());
 
-        $zip_file = $tmp_folder . '.zip';
-        @copy($zip_url, $zip_file);
+		$zip_file = $tmp_folder . '.zip';
+		@copy($zip_url, $zip_file);
 
-        $unzip = new \Unzip;
-        $files = $unzip->extract($zip_file, $tmp_folder);
+		$unzip = new \Unzip;
+		$files = $unzip->extract($zip_file, $tmp_folder);
 
-        // Grab the first folder out of it (we dont know what it's called)
-        list($tmp_package_folder) = glob($tmp_folder.'/*', GLOB_ONLYDIR);
+		// Grab the first folder out of it (we dont know what it's called)
+		list($tmp_package_folder) = glob($tmp_folder.'/*', GLOB_ONLYDIR);
 
-        $package_folder = PKGPATH . $package;
+		$package_folder = PKGPATH . $package;
 
-        // Move that folder into the packages folder
-        rename($tmp_package_folder, $package_folder);
+		// Move that folder into the packages folder
+		rename($tmp_package_folder, $package_folder);
 
-        unlink($zip_file);
-        rmdir($tmp_folder);
+		unlink($zip_file);
+		rmdir($tmp_folder);
 
-        foreach ($files as $file)
-        {
-            $path = str_replace($tmp_package_folder, $package_folder, $file);
-            chmod($path, octdec(755));
-            \Cli::write("\t" . $path);
-        }
-    }
+		foreach ($files as $file)
+		{
+			$path = str_replace($tmp_package_folder, $package_folder, $file);
+			chmod($path, octdec(755));
+			\Cli::write("\t" . $path);
+		}
+	}
 
-    public static function _clone_package_repo($source, $package, $version)
-    {
-        $repo_url = 'git://' . rtrim($source, '/').'/fuel-'.$package . '.git';
+	public static function _clone_package_repo($source, $package, $version)
+	{
+		$repo_url = 'git://' . rtrim($source, '/').'/fuel-'.$package . '.git';
 
-        \Cli::write('Downloading package: ' . $repo_url);
+		\Cli::write('Downloading package: ' . $repo_url);
 
-        $package_folder = PKGPATH . $package;
+		$package_folder = PKGPATH . $package;
 
-        // Clone to the package path
-        passthru(static::$git . ' clone ' . $repo_url . ' ' . $package_folder);
+		// Clone to the package path
+		passthru(static::$git . ' clone ' . $repo_url . ' ' . $package_folder);
 
-        passthru(static::$git .' add ' . $package_folder . '/');
+		passthru(static::$git .' add ' . $package_folder . '/');
 
-        \Cli::write('');
-    }
+		\Cli::write('');
+	}
 }
 
 /* End of file package.php */

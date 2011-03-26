@@ -12,7 +12,6 @@
  * @link       http://fuelphp.com
  */
 
-
 namespace Fuel\Core;
 
 /**
@@ -20,44 +19,44 @@ namespace Fuel\Core;
  *
  * A base controller for easily creating templated output.
  *
- * @package        Fuel
- * @category    Core
- * @author        Fuel Development Team
+ * @package		Fuel
+ * @category	Core
+ * @author		Fuel Development Team
  */
 abstract class Controller_Template extends \Controller {
 
-    /**
-    * @var string page template
-    */
-    public $template = 'template';
+	/**
+	* @var string page template
+	*/
+	public $template = 'template';
 
-    /**
-    * @var boolean auto render template
-    **/
-    public $auto_render = true;
+	/**
+	* @var boolean auto render template
+	**/
+	public $auto_render = true;
 
-    // Load the template and create the $this->template object
-    public function before()
-    {
-        if ($this->auto_render === true)
-        {
-            // Load the template
-            $this->template = \View::factory($this->template);
-        }
+	// Load the template and create the $this->template object
+	public function before()
+	{
+		if ($this->auto_render === true)
+		{
+			// Load the template
+			$this->template = \View::factory($this->template);
+		}
 
-        return parent::before();
-    }
+		return parent::before();
+	}
 
-    // After contorller method has run output the template
-    public function after()
-    {
-        if ($this->auto_render === true)
-        {
-            $this->output = $this->template;
-        }
+	// After contorller method has run output the template
+	public function after()
+	{
+		if ($this->auto_render === true)
+		{
+			$this->response->body($this->template);
+		}
 
-        return parent::after();
-    }
+		return parent::after();
+	}
 
 }
 /* End of file template.php */

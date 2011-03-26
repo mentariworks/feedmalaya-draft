@@ -35,7 +35,7 @@ class Association {
         }
         else
         {
-            $this->dest_class = \Inflector::classify($dest);
+            $this->dest_class = static::class_name($dest);
         }
 
         if (isset($options['foreign_key']))
@@ -91,7 +91,11 @@ class Association {
             }
         }
     }
-
+	
+	public static function class_name($name)
+	{
+		return str_replace(array(' ', '-'), '_', ucwords(str_replace('_', ' ', \Inflector::singularize($name))));
+	}
 }
 
 /* End of file association.php */

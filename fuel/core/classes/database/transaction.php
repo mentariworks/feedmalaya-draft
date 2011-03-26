@@ -15,8 +15,8 @@ namespace Fuel\Core;
 
 class Database_Transaction 
 {
-    protected static $_instance = null;
-    protected $_db;
+	protected static $_instance = null;
+	protected $_db;
 
 	public static function instance()
 	{
