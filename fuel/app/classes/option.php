@@ -13,7 +13,7 @@
  */
 
 /**
- * Option Class 
+ * App\Option Class 
  * 
  * Option is based on the functionality of wp_option in WordPress
  * 
