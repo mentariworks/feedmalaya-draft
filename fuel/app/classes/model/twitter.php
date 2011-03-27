@@ -11,13 +11,12 @@
  * @license    GPLv2 License (or later)
  * @link       http://github.com/mentariworks/feedmalaya
  */
+class Model_Twitter extends ActiveRecord\Model {
 
-class Model_Twitter extends ActiveRecord\Model { 
-	
-	protected $has_one = array (
-		'users_twitters' => array ('class_name' => 'Model_Users_Twitter')
+	protected $has_one = array(
+		'users_twitters' => array('class_name' => 'Model_Users_Twitter')
 	);
-	
+
 }
 
 /* End of file twitter.php */

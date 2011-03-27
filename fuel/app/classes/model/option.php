@@ -11,14 +11,8 @@
  * @license    GPLv2 License (or later)
  * @link       http://github.com/mentariworks/feedmalaya
  */
-class Model_Comment extends ActiveRecord\Model { 
-	
-	protected $belongs_to = array (
-		'comments' => array('class_name' => 'Model_Comment'),
-		'posts' => array('class_name' => 'Model_Post'),
-		'users' => array('class_name' => 'Model_User'),
-	);
+class Model_Option extends ActiveRecord\Model {
 	
 }
 
-/* End of file comment.php */
+/* End of file option.php */

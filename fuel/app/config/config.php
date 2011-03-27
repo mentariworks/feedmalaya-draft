@@ -95,6 +95,12 @@ return array(
 		 * Whether to automatically encode (htmlentities) view data
 		 */
 		'auto_encode_view_data'	=> false,
+
+		/**
+		 * With output encoding switched on all objects passed will be converted to strings or
+		 * throw exceptions unless they are instances of the classes in this array.
+		 */
+		'whitelisted_classes' => array('Fuel\\Core\\View', 'Fuel\\Core\\ViewModel', 'Closure')
 	),
 
 	/**
