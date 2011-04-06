@@ -121,10 +121,12 @@ class Command
 
 				case 't':
 				case 'test':
-					// by right PHPUnit isn't loaded until bootstrap_phpunit is called
-					include_once('PHPUnit/Autoload.php');
-					
-					// Attempt to load PUPUnit.  If it fails, we are done.
+
+					// Suppressing this because if the file does not exist... well thats a bad thing and we can't really check
+					// I know that supressing errors is bad, but if you're going to complain: shut up. - Phil
+					@include_once('PHPUnit/Autoload.php');
+
+					// Attempt to load PHUnit.  If it fails, we are done.
 					if ( ! class_exists('PHPUnit_Framework_TestCase'))
 					{
 						throw new Exception('PHPUnit does not appear to be installed.'.PHP_EOL.PHP_EOL."\tPlease visit http://phpunit.de and install.");

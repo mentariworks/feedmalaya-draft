@@ -12,6 +12,7 @@
  * @link       http://fuelphp.com
  */
 
+
 namespace ActiveRecord;
 
 

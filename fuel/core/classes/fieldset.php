@@ -290,14 +290,34 @@ class Fieldset
 	/**
 	 * Set all fields to the given and/or posted input
 	 *
-	 * @return Fieldset	this, to allow chaining
+	 * @param   array|Model
+	 * @return  Fieldset     this, to allow chaining
 	 */
-	public function repopulate()
+	public function repopulate($input = null)
 	{
 		foreach ($this->fields as $f)
 		{
-			if (($value = $this->input($f->name, null)) !== null)
-			$f->set_value($value);
+			if ($input)
+			{
+				if (is_array($input) or $input instanceof \ArrayAccess)
+				{
+					if ($value = $input[$f->name])
+					{
+						$f->set_value($value);
+					}
+				}
+				elseif (is_object($input) and property_exists($input, $f->name))
+				{
+					$f->set_value($input->{$f->name});
+				}
+			}
+			else
+			{
+				if (($value = $this->input($f->name, null)) !== null)
+				{
+					$f->set_value($value);
+				}
+			}
 		}
 
 		return $this;
@@ -316,9 +336,9 @@ class Fieldset
 	/**
 	 * Alias for $this->form()->build() for this fieldset
 	 */
-	public function build()
+	public function build($action = null)
 	{
-		return $this->form()->build();
+		return $this->form()->build($action);
 	}
 
 	/**

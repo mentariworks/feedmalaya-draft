@@ -202,6 +202,7 @@ class Form {
 		if (is_array($field))
 		{
 			$attributes = $field;
+			! array_key_exists('value', $attributes) and $attributes['value'] = '';
 		}
 		else
 		{
@@ -448,6 +449,7 @@ class Form {
 		if (is_array($field))
 		{
 			$attributes = $field;
+			$attributes['selected'] = empty($attributes['value']) ? '' : $attributes['value'];
 		}
 		else
 		{
@@ -455,8 +457,6 @@ class Form {
 			$attributes['selected'] = $values;
 			$attributes['options'] = $options;
 		}
-
-		$value = empty($attributes['value']) ? '' : $attributes['value'];
 		unset($attributes['value']);
 
 		if ( ! isset($attributes['options']) || ! is_array($attributes['options']))
@@ -635,7 +635,7 @@ class Form {
 		switch($field->type)
 		{
 			case 'hidden':
-				$build_field = static::hidden($field);
+				$build_field = static::hidden($field->name, $field->value, $field->attributes);
 				break;
 			case 'radio': case 'checkbox':
 				if (isset($field->options))

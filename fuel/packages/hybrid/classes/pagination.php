@@ -11,7 +11,7 @@
  * @copyright	2010 - 2011 Fuel Development Team
  */
 
-namespace Fuel\Core;
+namespace Hybrid;
 
 
 
@@ -56,6 +56,11 @@ class Pagination {
 	 * @var	mixed	The pagination URL
 	 */
 	protected static $pagination_url;
+	
+	/**
+	 * @var	mixed	The pagination URL (after the page number URI segment)
+	 */
+	protected static $suffix_url;
 
 	/**
 	 * Init
@@ -107,7 +112,7 @@ class Pagination {
 
 		static::$total_pages = ceil(static::$total_items / static::$per_page) ?: 1;
 
-		is_null(static::$current_page) and static::$current_page = (int) \URI::segment(static::$uri_segment);
+		static::$current_page = (int) \URI::segment(static::$uri_segment);
 
 		if (static::$current_page > static::$total_pages)
 		{
@@ -138,36 +143,15 @@ class Pagination {
 		}
 
 		$pagination = '';
-		$pagination .= '&nbsp;'.static::prev_link('&laquo Previous').'&nbsp;&nbsp;';
-		$pagination .= static::page_links();
-		$pagination .= '&nbsp;'.static::next_link('Next &raquo;');
 
-		return $pagination;
-	}
-	
-	// --------------------------------------------------------------------
-
-	/**
-	 * Pagination Page Number links
-	 *
-	 * @access public
-	 * @return mixed    Markup for page number links
-	 */
-	public static function page_links()
-	{
-		if (static::$total_pages == 1)
-		{
-			return '';
-		}
-		
-		$pagination = '';
-		
 		// Let's get the starting page number, this is determined using num_links
 		$start = ((static::$current_page - static::$num_links) > 0) ? static::$current_page - (static::$num_links - 1) : 1;
 
 		// Let's get the ending page number
 		$end   = ((static::$current_page + static::$num_links) < static::$total_pages) ? static::$current_page + static::$num_links : static::$total_pages;
-		
+
+		$pagination .= '&nbsp;'.static::prev_link('&laquo Previous').'&nbsp;&nbsp;';
+
 		for($i = $start; $i <= $end; $i++)
 		{
 			if (static::$current_page == $i)
@@ -177,10 +161,12 @@ class Pagination {
 			else
 			{
 				$url = ($i == 1) ? '' : '/'.$i;
-				$pagination .= \Html::anchor(rtrim(static::$pagination_url, '/') . $url, $i);
+				$pagination .= \Html::anchor(rtrim(static::$pagination_url, '/') . $url . '/' . static::$suffix_url, $i);
 			}
 		}
-		
+
+		$pagination .= '&nbsp;'.static::next_link('Next &raquo;');
+
 		return $pagination;
 	}
 
@@ -207,7 +193,7 @@ class Pagination {
 		else
 		{
 			$next_page = static::$current_page + 1;
-			return \Html::anchor(rtrim(static::$pagination_url, '/').'/'.$next_page, $value);
+			return \Html::anchor(rtrim(static::$pagination_url, '/').'/'.$next_page . '/'. static::$suffix_url, $value);
 		}
 	}
 
@@ -235,8 +221,40 @@ class Pagination {
 		{
 			$previous_page = static::$current_page - 1;
 			$previous_page = ($previous_page == 1) ? '' : '/' . $previous_page;
-			return \Html::anchor(rtrim(static::$pagination_url, '/') . $previous_page, $value);
+			return \Html::anchor(rtrim(static::$pagination_url, '/') . $previous_page . '/' . static::$suffix_url, $value);
 		}
+	}
+	
+	public static function build_get_query($values) 
+	{
+		$dataset = array ();
+		
+		$check_get_input = function($value, & $dataset) 
+		{
+			$data = \Hybrid\Input::get($value);
+			
+			if (empty($data)) {
+				return false;
+			}
+			else {
+				array_push($dataset, sprintf('%s=%s', $value, $data));
+				return;
+			}
+		};
+		
+		if (is_array($values))
+		{
+			foreach ($values as $value)
+			{
+				$check_get_input($value, $dataset);
+			}
+		}
+		else 
+		{
+			$check_get_input($values, $dataset);
+		}
+		
+		return '?' . implode('&', $dataset);
 	}
 }
 

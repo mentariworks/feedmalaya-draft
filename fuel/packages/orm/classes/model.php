@@ -15,7 +15,7 @@
 namespace Orm;
 use \Inflector;
 
-class Model {
+class Model implements \ArrayAccess, \Iterator {
 
 	/* ---------------------------------------------------------------------------
 	 * Static usage
@@ -29,10 +29,11 @@ class Model {
 	/**
 	 * @var  array  relationship properties
 	 */
-	// protected static $_hasone;
-	// protected static $_belongsto;
-	// protected static $_hasmany;
-	// protected static $_manymany;
+	// protected static $_has_one;
+	// protected static $_belongs_to;
+	// protected static $_has_many;
+	// protected static $_many_many;
+	// protected static $_many_through;
 
 	/**
 	 * @var  array  name or names of the primary keys
@@ -68,10 +69,11 @@ class Model {
 	 * @var  array  array of valid relation types
 	 */
 	protected static $_valid_relations = array(
-		'belongs_to'  => 'Orm\\BelongsTo',
-		'has_one'     => 'Orm\\HasOne',
-		'has_many'    => 'Orm\\HasMany',
-		'many_many'   => 'Orm\\ManyMany'
+		'belongs_to'    => 'Orm\\BelongsTo',
+		'has_one'       => 'Orm\\HasOne',
+		'has_many'      => 'Orm\\HasMany',
+		'many_many'     => 'Orm\\ManyMany',
+		'many_through'  => 'Orm\\ManyThrough',
 	);
 
 	public static function factory($data = array(), $new = true)
@@ -113,7 +115,7 @@ class Model {
 	public static function cached_object($obj, $class = null)
 	{
 		$class = $class ?: get_called_class();
-		$id    = static::implode_pk($obj);
+		$id    = is_int($obj) or is_string($obj) ? (string) $obj : static::implode_pk($obj);
 
 		return ( ! empty(static::$_cached_objects[$class][$id])) ? static::$_cached_objects[$class][$id] : false;
 	}
@@ -139,13 +141,21 @@ class Model {
 		if (count(static::$_primary_key) == 1)
 		{
 			$p = reset(static::$_primary_key);
-			return (is_object($data) ? $data->{$p} : (isset($data[$p]) ? $data[$p] : null));
+			return (is_object($data)
+				? strval($data->{$p})
+				: (isset($data[$p])
+					? strval($data[$p])
+					: null));
 		}
 
 		$pk = '';
 		foreach(static::$_primary_key as $p)
 		{
-			$pk .= '['.(is_object($data) ? $data->{$p} : (isset($data[$p]) ? $data[$p] : null)).']';
+			if (is_null((is_object($data) ? $data->{$p} : (isset($data[$p]) ? $data[$p] : null))))
+			{
+				return null;
+			}
+			$pk .= '['.(is_object($data) ? $data->{$p} : $data[$p]).']';
 		}
 
 		return $pk;
@@ -189,8 +199,8 @@ class Model {
 			}
 			catch (\Exception $e)
 			{
-				throw new Exception('Listing columns not possible, you have to set the model properties with a '.
-					'static $_properties setting in the model.');
+				throw new Exception('Listing columns not failed, you have to set the model properties with a '.
+					'static $_properties setting in the model. Original exception: '.$e->getMessage());
 			}
 		}
 
@@ -302,7 +312,7 @@ class Model {
 
 			foreach(static::primary_key() as $pk)
 			{
-				$query->order($pk, $id == 'first' ? 'ASC' : 'DESC');
+				$query->order_by($pk, $id == 'first' ? 'ASC' : 'DESC');
 			}
 
 			return $query->get_one();
@@ -522,6 +532,30 @@ class Model {
 		{
 			$this->_original[$key] = $val;
 		}
+
+		$this->_update_original_relations();
+	}
+
+	/**
+	 * Update the original relations for this object
+	 */
+	public function _update_original_relations()
+	{
+		$this->_original_relations = array();
+		foreach ($this->_data_relations as $rel => $data)
+		{
+			if (is_array($data))
+			{
+				foreach ($data as $obj)
+				{
+					$this->_original_relations[$rel][] = $obj ? $obj->implode_pk($obj) : null;
+				}
+			}
+			else
+			{
+				$this->_original_relations[$rel] = $data ? $data->implode_pk($data) : null;
+			}
+		}
 	}
 
 	/**
@@ -531,36 +565,24 @@ class Model {
 	 * @param   array|null  $rels
 	 * @return  void|array
 	 */
-	public function _relate($rels = null)
+	public function _relate($rels = false)
 	{
 		if ($this->_frozen)
 		{
 			throw new FrozenObject('No changes allowed.');
 		}
 
-		if (is_null($rels))
+		if ($rels === false)
 		{
 			return $this->_data_relations;
 		}
-		else
+		elseif (is_array($rels))
 		{
 			$this->_data_relations = $rels;
-
-			$this->_original_relations = array();
-			foreach ($rels as $rel => $data)
-			{
-				if (is_array($data))
-				{
-					foreach ($data as $obj)
-					{
-						$this->_original_relations[$rel][] = $obj->implode_pk($obj);
-					}
-				}
-				else
-				{
-					$this->_original_relations[$rel] = $obj->implode_pk($obj);
-				}
-			}
+		}
+		else
+		{
+			throw new Exception('Invalid input for _relate(), should be an array.');
 		}
 	}
 
@@ -586,6 +608,7 @@ class Model {
 			if ( ! array_key_exists($property, $this->_data_relations))
 			{
 				$this->_data_relations[$property] = $rel->get($this);
+				$this->_update_original_relations();
 			}
 			return $this->_data_relations[$property];
 		}
@@ -646,13 +669,13 @@ class Model {
 		$this->freeze();
 		foreach($this->relations() as $rel_name => $rel)
 		{
-			$rel->save(
-				$this,
-				array_key_exists($rel_name, $this->_data_relations) ? $this->_data_relations[$rel_name] : null,
-				array_key_exists($rel_name, $this->_original_relations) ? $this->_original_relations[$rel_name] : null,
-				false,
-				is_array($cascade) ? in_array($rel_name, $cascade) : $cascade
-			);
+			if (array_key_exists($rel_name, $this->_data_relations))
+			{
+				$rel->save($this, $this->{$rel_name},
+					array_key_exists($rel_name, $this->_original_relations) ? $this->_original_relations[$rel_name] : null,
+					false, is_array($cascade) ? in_array($rel_name, $cascade) : $cascade
+				);
+			}
 		}
 		$this->unfreeze();
 
@@ -662,15 +685,17 @@ class Model {
 		$this->freeze();
 		foreach($this->relations() as $rel_name => $rel)
 		{
-			$rel->save(
-				$this,
-				array_key_exists($rel_name, $this->_data_relations) ? $this->_data_relations[$rel_name] : null,
-				array_key_exists($rel_name, $this->_original_relations) ? $this->_original_relations[$rel_name] : null,
-				true,
-				is_array($cascade) ? in_array($rel_name, $cascade) : $cascade
-			);
+			if (array_key_exists($rel_name, $this->_data_relations))
+			{
+				$rel->save($this, $this->{$rel_name},
+					array_key_exists($rel_name, $this->_original_relations) ? $this->_original_relations[$rel_name] : null,
+					true, is_array($cascade) ? in_array($rel_name, $cascade) : $cascade
+				);
+			}
 		}
 		$this->unfreeze();
+
+		$this->_update_original();
 
 		$this->observe('after_save');
 
@@ -715,7 +740,6 @@ class Model {
 		// update the original properties on creation and cache object for future retrieval in this request
 		$this->_is_new = false;
 		static::$_cached_objects[get_class($this)][static::implode_pk($this)] = $this;
-		$this->_update_original();
 
 		$this->observe('after_insert');
 
@@ -766,7 +790,6 @@ class Model {
 		}
 
 		// update the original property on success
-		$this->_update_original();
 
 		$this->observe('after_update');
 
@@ -795,12 +818,7 @@ class Model {
 		$this->freeze();
 		foreach($this->relations() as $rel_name => $rel)
 		{
-			$rel->delete(
-				$this,
-				array_key_exists($rel_name, $this->_data_relations) ? $this->_data_relations[$rel_name] : null,
-				false,
-				is_array($cascade) ? in_array($rel_name, $cascade) : $cascade
-			);
+			$rel->delete($this, $this->{$rel_name}, false, is_array($cascade) ? in_array($rel_name, $cascade) : $cascade);
 		}
 		$this->unfreeze();
 
@@ -821,12 +839,7 @@ class Model {
 		$this->freeze();
 		foreach($this->relations() as $rel_name => $rel)
 		{
-			$rel->delete(
-				$this,
-				array_key_exists($rel_name, $this->_data_relations) ? $this->_data_relations[$rel_name] : null,
-				true,
-				is_array($cascade) ? in_array($rel_name, $cascade) : $cascade
-			);
+			$rel->delete($this, $this->{$rel_name}, true, is_array($cascade) ? in_array($rel_name, $cascade) : $cascade);
 		}
 		$this->unfreeze();
 
@@ -968,6 +981,80 @@ class Model {
 		// hasmany-belongsto can be copied, ie no change
 		// many-many relationships should be copied, ie no change
 	}
+
+
+	/**
+	 * Method for use with Fieldset::add_model()
+	 *
+	 * @param   Fieldset     Fieldset instance to add fields to
+	 * @param   array|Model  Model instance or array for use to repopulate
+	 */
+	public static function set_form_fields($form, $instance = null)
+	{
+		Observer_Validation::set_fields(get_called_class(), $form);
+		$instance and $form->repopulate($instance);
+	}
+
+	/**
+	 * Implementation of ArrayAccess
+	 */
+
+	public function offsetSet($offset, $value)
+	{
+		if (is_null($offset))
+		{
+			return false;
+		}
+		else
+		{
+			$this->_data[$offset] = $value;
+		}
+	}
+
+	public function offsetExists($offset)
+	{
+		return isset($this->_data[$offset]);
+	}
+
+	public function offsetUnset($offset)
+	{
+		unset($this->_data[$offset]);
+	}
+
+	public function offsetGet($offset)
+	{
+		return isset($this->_data[$offset]) ? $this->_data[$offset] : null;
+	}
+
+	/**
+	 * Implementation of Iterable
+	 */
+
+	public function rewind()
+	{
+		reset($this->_data);
+	}
+
+	public function current()
+	{
+		return current($this->_data);
+	}
+
+	public function key()
+	{
+		return key($this->_data);
+	}
+
+	public function next()
+	{
+		return next($this->_data);
+	}
+
+	public function valid()
+	{
+		return $this->current() !== false;
+	}
+
 }
 
 /* End of file model.php */

@@ -44,22 +44,13 @@ class ManyMany extends Relation {
 	{
 		$this->name        = $name;
 		$this->model_from  = $from;
-		$this->model_to    = array_key_exists('model_to', $config) ? $config['model_to'] : 'Model_'.\Inflector::classify($name);
+		$this->model_to    = array_key_exists('model_to', $config) ? $config['model_to'] : \Inflector::get_namespace($from).'Model_'.\Inflector::classify($name);
 		$this->key_from    = array_key_exists('key_from', $config) ? (array) $config['key_from'] : $this->key_from;
 		$this->key_to      = array_key_exists('key_to', $config) ? (array) $config['key_to'] : $this->key_to;
 
-		$this->cascade_save    = array_key_exists('cascade_save', $config) ? $config['cascade_save'] : $this->cascade_save;
-		$this->cascade_delete  = array_key_exists('cascade_save', $config) ? $config['cascade_save'] : $this->cascade_delete;
-
-		// Allow for many-many through another object...
-		if ( ! empty($config['through']['model']))
+		if ( ! empty($config['table_through']))
 		{
-			$this->model_through = $config['through']['model'];
-		}
-		// ...or allow for many-many matching with simple 2 column table
-		elseif ( ! empty($config['through']['table']))
-		{
-			$this->table_through = $config['through']['table'];
+			$this->table_through = $config['table_through'];
 		}
 		else
 		{
@@ -68,53 +59,56 @@ class ManyMany extends Relation {
 			$table_name = array_merge($table_name);
 			$this->table_through = \Inflector::tableize($table_name[0]).'_'.\Inflector::tableize($table_name[1]);
 		}
-		$this->key_through_from = ! empty($config['through']['key_from'])
-			? (array) $config['through']['key_from'] : (array) \Inflector::foreign_key($this->model_from);
-		$this->key_through_to = ! empty($config['through']['key_to'])
-			? (array) $config['through']['key_to'] : (array) \Inflector::foreign_key($this->model_to);
+		$this->key_through_from = ! empty($config['key_through_from'])
+			? (array) $config['key_through_from'] : (array) \Inflector::foreign_key($this->model_from);
+		$this->key_through_to = ! empty($config['key_through_to'])
+			? (array) $config['key_through_to'] : (array) \Inflector::foreign_key($this->model_to);
+
+		$this->cascade_save    = array_key_exists('cascade_save', $config) ? $config['cascade_save'] : $this->cascade_save;
+		$this->cascade_delete  = array_key_exists('cascade_save', $config) ? $config['cascade_save'] : $this->cascade_delete;
 	}
 
 	public function get(Model $from)
 	{
-	}
+		// Create the query on the model_through
+		$query = call_user_func(array($this->model_to, 'find'));
 
-	public function select($table)
-	{
-		$props = call_user_func(array($this->model_to, 'properties'));
-		$i = 0;
-		$properties = array();
-		foreach ($props as $pk => $pv)
+		// set the model_from's keys as where conditions for the model_through
+		$join = array(
+				'table'      => array($this->table_through, 't0_through'),
+				'join_type'  => null,
+				'join_on'    => array(),
+				'columns'    => $this->select_through('t0_through')
+		);
+
+		reset($this->key_from);
+		foreach ($this->key_through_from as $key)
 		{
-			$properties[] = array($table.'.'.$pk, $table.'_c'.$i);
-			$i++;
+			$query->where('t0_through.'.$key, $from->{current($this->key_from)});
+			next($this->key_from);
 		}
 
-		return $properties;
+		reset($this->key_to);
+		foreach ($this->key_through_to as $key)
+		{
+			$join['join_on'][] = array('t0_through.'.$key, '=', 't0.'.current($this->key_to));
+			next($this->key_to);
+		}
+
+		$query->_join($join);
+
+		return $query->get();
 	}
 
 	public function select_through($table)
 	{
-		if (empty($this->model_through))
+		foreach ($this->key_through_to as $to)
 		{
-			foreach ($this->key_through_to as $to)
-			{
-				$properties[] = $table.$to;
-			}
-			foreach ($this->key_through_from as $from)
-			{
-				$properties[] = $table.$from;
-			}
+			$properties[] = $table.'.'.$to;
 		}
-		else
+		foreach ($this->key_through_from as $from)
 		{
-			$i = 1;
-			$rel = call_user_func(array($this->model_from, 'relations'), $this->model_through);
-			$props = call_user_func(array($rel->model_to, 'properties'));
-			foreach ($props as $pk => $pv)
-			{
-				$properties[] = array($table.'.'.$pk, $table.'_c'.$i);
-				$i++;
-			}
+			$properties[] = $table.'.'.$from;
 		}
 
 		return $properties;
@@ -124,21 +118,10 @@ class ManyMany extends Relation {
 	{
 		$alias_to = 't'.$alias_to_nr;
 
-		if (empty($this->model_through))
-		{
-			$rel = null;
-			$through_table = $this->table_through;
-		}
-		else
-		{
-			$rel = call_user_func(array($this->model_from, 'relations'), $this->model_through);
-			$through_table = call_user_func(array($rel->model_to, 'table'));
-		}
-
 		$models = array(
 			array(
-				'model'      => $rel ? $rel->model_to : null,
-				'table'      => array($through_table, $alias_to.'_through'),
+				'model'      => null,
+				'table'      => array($this->table_through, $alias_to.'_through'),
 				'join_type'  => 'left',
 				'join_on'    => array(),
 				'columns'    => $this->select_through($alias_to.'_through'),
@@ -173,34 +156,135 @@ class ManyMany extends Relation {
 		return $models;
 	}
 
-	public function save($model_from, $model_to, $original_model_to, $parent_saved, $cascade)
+	public function save($model_from, $models_to, $original_model_ids, $parent_saved, $cascade)
 	{
 		if ( ! $parent_saved)
 		{
 			return;
 		}
 
-		$cascade = is_null($cascade) ? $this->cascade_save : (bool) $cascade;
-		if ($cascade)
+		if ( ! is_array($models_to) and ($models_to = is_null($models_to) ? array() : $models_to) !== array())
 		{
-			foreach ($model_to as $m)
+			throw new Exception('Assigned relationships must be an array or null, given relationship value for '.
+				$this->name.' is invalid.');
+		}
+		$original_model_ids === null and $original_model_ids = array();
+
+		foreach ($models_to as $key => $model_to)
+		{
+			if ( ! $model_to instanceof $this->model_to)
+			{
+				throw new Exception('Invalid Model instance added to relations in this model.');
+			}
+
+			// Save if it's a yet unsaved object
+			if ($model_to->is_new())
+			{
+				$model_to->save(false);
+			}
+
+			$current_model_id = $model_to ? $model_to->implode_pk($model_to) : null;
+
+			// Check if the model was already assigned, if not INSERT relationships:
+			if ( ! in_array($current_model_id, $original_model_ids))
+			{
+				$ids = array();
+				reset($this->key_from);
+				foreach ($this->key_through_from as $pk)
+				{
+					$ids[$pk] = $model_from->{current($this->key_from)};
+					next($this->key_from);
+				}
+
+				reset($this->key_to);
+				foreach ($this->key_through_to as $pk)
+				{
+					$ids[$pk] = $model_to->{current($this->key_to)};
+					next($this->key_to);
+				}
+
+				\DB::insert($this->table_through)->set($ids)->execute();
+			}
+			else
+			{
+				// unset current model from from array
+				unset($original_model_ids[array_search($current_model_id, $original_model_ids)]);
+			}
+
+			// ensure correct pk assignment
+			if ($key != $current_model_id)
+			{
+				$model_from->unfreeze();
+				$rel = $model_from->_relate();
+				if ( ! empty($rel[$this->name][$key]) and $rel[$this->name][$key] === $model_to)
+				{
+					unset($rel[$this->name][$key]);
+				}
+				$rel[$this->name][$current_model_id] = $model_to;
+				$model_from->_relate($rel);
+				$model_from->freeze();
+			}
+		}
+
+		// If any original ids are left they are no longer assigned, DELETE the relationships:
+		foreach ($original_model_ids as $original_model_id)
+		{
+			$query = \DB::delete($this->table_through);
+
+			reset($this->key_from);
+			foreach ($this->key_through_from as $key)
+			{
+				$query->where($key, '=', $model_from->{current($this->key_from)});
+				next($this->key_from);
+			}
+
+			$to_keys = count($this->key_to) == 1 ? array($original_model_id) : explode('][', substr($original_model_id, 1, -1));
+			reset($to_keys);
+			foreach ($this->key_through_to as $key)
+			{
+				$query->where($key, '=', current($to_keys));
+				next($to_keys);
+			}
+
+			$query->execute();
+		}
+
+		$cascade = is_null($cascade) ? $this->cascade_save : (bool) $cascade;
+		if ($cascade and ! empty($models_to))
+		{
+			foreach ($models_to as $m)
 			{
 				$m->save();
 			}
 		}
 	}
 
-	public function delete($model_from, $model_to, $parent_deleted, $cascade)
+	public function delete($model_from, $models_to, $parent_deleted, $cascade)
 	{
 		if ( ! $parent_deleted)
 		{
 			return;
 		}
 
-		$cascade = is_null($cascade) ? $this->cascade_save : (bool) $cascade;
-		if ($cascade)
+		// Remove relations
+		$rels = $model_from->_relate();
+		$rels[$this->name] = array();
+		$model_from->_relate($rels);
+
+		// Delete all relationship entries for the model_from
+		$query = \DB::delete($this->table_through);
+		reset($this->key_from);
+		foreach ($this->key_through_from as $key)
 		{
-			foreach ($model_to as $m)
+			$query->where($key, '=', $model_from->{current($this->key_from)});
+			next($this->key_from);
+		}
+		$query->delete();
+
+		$cascade = is_null($cascade) ? $this->cascade_save : (bool) $cascade;
+		if ($cascade and ! empty($model_to))
+		{
+			foreach ($models_to as $m)
 			{
 				$m->delete();
 			}

@@ -29,14 +29,14 @@ class Scaffold
 		Generate::$scaffolding = true;
 	}
 
-	public function generate($args, $subfolder = 'default')
+	public static function generate($args, $subfolder = 'default')
 	{
 		$subfolder = trim($subfolder, '/');
 		if ( ! is_dir( PKGPATH.'oil/views/'.$subfolder))
 		{
 			throw new Exception('The subfolder for scaffolding templates doesn\'t exist or is spelled wrong: '.$subfolder.' ');
 		}
-	
+
 		// Do this first as there is the largest chance of error here
 		Generate::model($args, false);
 
@@ -59,7 +59,7 @@ class Scaffold
 		$data['plural'] = $plural = \Inflector::pluralize($singular);
 		$data['fields'] = $fields;
 
-		$filepath = APPPATH.'classes/controller/'.$plural.'.php';
+		$filepath = APPPATH.'classes/controller/'.trim(str_replace(array('_', '-'), DS, $plural), DS).'.php';
 		$controller = \View::factory($subfolder.'/scaffold/controller', $data);
 
 		$controller->actions = array(
@@ -92,7 +92,7 @@ class Scaffold
 
 		// Write controller
 		Generate::create($filepath, $controller, 'controller');
-		
+
 		// Create each of the views
 		foreach (array('index', 'view', 'create', 'edit', '_form') as $view)
 		{

@@ -80,7 +80,19 @@ abstract class Relation {
 	 * @param   string
 	 * @return  array
 	 */
-	abstract public function select($table);
+	public function select($table)
+	{
+		$props = call_user_func(array($this->model_to, 'properties'));
+		$i = 0;
+		$properties = array();
+		foreach ($props as $pk => $pv)
+		{
+			$properties[] = array($table.'.'.$pk, $table.'_c'.$i);
+			$i++;
+		}
+
+		return $properties;
+	}
 
 	/**
 	 * Returns tables to join and fields to select with optional additional settings like order/where
@@ -100,7 +112,7 @@ abstract class Relation {
 	 * @param  null|bool    either uses default setting (null) or forces when true or prevents when false
 	 * @todo   make abstract
 	 */
-	abstract public function save($model_from, $model_to, $original_model_to, $parent_saved, $cascade);
+	abstract public function save($model_from, $model_to, $original_model_id, $parent_saved, $cascade);
 
 	/**
 	 * Takes the current relations and attempts to delete them when cascading is allowed or forced

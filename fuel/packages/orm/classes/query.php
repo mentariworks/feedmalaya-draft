@@ -37,6 +37,11 @@ class Query {
 	protected $relations = array();
 
 	/**
+	 * @var  array  tables to join without returning any info
+	 */
+	protected $joins = array();
+
+	/**
 	 * @var  array  fields to select
 	 */
 	protected $select = array();
@@ -55,11 +60,6 @@ class Query {
 	 * @var  array  where conditions
 	 */
 	protected $where = array();
-
-	/**
-	 * @var  array  or where conditions
-	 */
-	protected $or_where = array();
 
 	/**
 	 * @var  array  order by clauses
@@ -188,7 +188,7 @@ class Query {
 	 * @param  string
 	 * @todo   adding the table alias needs to work better, this will cause problems with WHERE IN
 	 */
-	public function _where($condition, $type = 'where')
+	public function _where($condition, $type = 'and_where')
 	{
 		if (empty($condition))
 		{
@@ -217,17 +217,76 @@ class Query {
 		strpos($condition[0], '.') === false and $condition[0] = $this->alias.'.'.$condition[0];
 		if (count($condition) == 2)
 		{
-			$this->{$type}[] = array($condition[0], '=', $condition[1]);
+			$this->where[] = array($type, array($condition[0], '=', $condition[1]));
 		}
 		elseif (count($condition) == 3)
 		{
-			$this->{$type}[] = $condition;
+			$this->where[] = array($type, $condition);
 		}
 		else
 		{
-			exit;
 			throw new Exception('Invalid param count for where condition.');
 		}
+
+		return $this;
+	}
+
+	/**
+	 * Open a nested and_where condition
+	 */
+	public function and_where_open()
+	{
+		$this->where[] = array('and_where_open', array());
+
+		return $this;
+	}
+
+	/**
+	 * Close a nested and_where condition
+	 */
+	public function and_where_close()
+	{
+		$this->where[] = array('and_where_close', array());
+
+		return $this;
+	}
+
+	/**
+	 * Alias to and_where_open()
+	 */
+	public function where_open()
+	{
+		$this->where[] = array('and_where_open', array());
+
+		return $this;
+	}
+
+	/**
+	 * Alias to and_where_close()
+	 */
+	public function where_close()
+	{
+		$this->where[] = array('and_where_close', array());
+
+		return $this;
+	}
+
+	/**
+	 * Open a nested or_where condition
+	 */
+	public function or_where_open()
+	{
+		$this->where[] = array('or_where_open', array());
+
+		return $this;
+	}
+
+	/**
+	 * Close a nested or_where condition
+	 */
+	public function or_where_close()
+	{
+		$this->where[] = array('or_where_close', array());
 
 		return $this;
 	}
@@ -238,7 +297,7 @@ class Query {
 	 * @param  string|array
 	 * @param  string|null
 	 */
-	public function order($property, $direction = 'ASC')
+	public function order_by($property, $direction = 'ASC')
 	{
 		if (is_array($property))
 		{
@@ -247,18 +306,19 @@ class Query {
 				// Simple array of keys
 				if (is_int($p))
 				{
-					$this->order($d, $direction);
+					$this->order_by($d, $direction);
 				}
 
 				// Assoc array of orders
 				else
 				{
-					$this->order($p, $d);
+					$this->order_by($p, $d);
 				}
 			}
 			return;
 		}
 
+		strpos($property, '.') === false and $property = $this->alias.'.'.$property;
 		$this->order_by[$property] = $direction;
 
 		return $this;
@@ -292,6 +352,18 @@ class Query {
 	}
 
 	/**
+	 * Add a table to join, consider this a protect method only for Orm package usage
+	 *
+	 * @param  array
+	 */
+	public function _join(array $join)
+	{
+		$this->joins[] = $join;
+
+		return $this;
+	}
+
+	/**
 	 * Set any properties for insert or update
 	 *
 	 * @param  string|array
@@ -320,7 +392,7 @@ class Query {
 	 * @param   string|select  either array for select query or string update, delete, insert
 	 * @return  array          with keys query and relations
 	 */
-	public function build_query($query, $columns = array())
+	public function build_query($query, $columns = array(), $type = 'select')
 	{
 		// Get the limit
 		if ( ! is_null($this->limit))
@@ -339,9 +411,9 @@ class Query {
 		{
 			foreach ($this->order_by as $property => $direction)
 			{
-				if (strpos($property, '.') === false or strpos($property, $this->alias.'.') === 0)
+				if (strpos($property, $this->alias.'.') === 0)
 				{
-					$query->order_by($property, $direction);
+					$query->order_by($type == 'select' ? $property : substr($property, strlen($this->alias.'.')), $direction);
 					unset($this->order_by[$property]);
 				}
 			}
@@ -355,33 +427,29 @@ class Query {
 
 		if ( ! empty($this->where))
 		{
-			foreach ($this->where as $key => $conditional)
+			foreach ($this->where as $key => $where)
 			{
-				if (strpos($conditional[0], '.') === false or strpos($conditional[0], $this->alias.'.') === 0)
+				list($method, $conditional) = $where;
+				if (empty($conditional) or strpos($conditional[0], $this->alias.'.') === 0)
 				{
-					$query->where($conditional[0], $conditional[1], $conditional[2]);
+					$type != 'select' and $conditional[0] = substr($conditional[0], strlen($this->alias.'.'));
+					call_user_func_array(array($query, $method), $conditional);
 					unset($this->where[$key]);
 				}
 			}
 		}
 
-		if ( ! empty($this->or_where))
+		// If it's not a select we're done
+		if ($type != 'select')
 		{
-			foreach ($this->or_where as $key => $conditional)
-			{
-				if (strpos($conditional[0], '.') === false or strpos($conditional[0], $this->alias.'.') === 0)
-				{
-					$query->or_where($conditional[0], $conditional[1], $conditional[2]);
-					unset($this->or_where[$key]);
-				}
-			}
+			return array('query' => $query, 'models' => array());
 		}
 
 		$i = 1;
 		$models = array();
 		foreach ($this->relations as $name => $rel)
 		{
-			$models = array_merge($models, $rel->join($this->alias, $name, ++$i));
+			$models = array_merge($models, $rel->join($this->alias, $name, $i++));
 		}
 
 		if ($this->use_subquery())
@@ -412,6 +480,14 @@ class Query {
 		}
 
 		// join tables
+		foreach ($this->joins as $j)
+		{
+			$join_query = $query->join($j['table'], $j['join_type']);
+			foreach ($j['join_on'] as $on)
+			{
+				$join_query->on($on[0], $on[1], $on[2]);
+			}
+		}
 		foreach ($models as $m)
 		{
 			$join_query = $query->join($m['table'], $m['join_type']);
@@ -426,25 +502,17 @@ class Query {
 		{
 			foreach ($this->order_by as $column => $direction)
 			{
-				$query->order($column, $direction);
+				$query->order_by($column, $direction);
 			}
 		}
 
 		// put omitted where conditions back
 		if ( ! empty($this->where))
 		{
-			foreach ($this->where as $key => $conditional)
+			foreach ($this->where as $where)
 			{
-				$query->where($conditional[0], $conditional[1], $conditional[2]);
-			}
-		}
-
-		// put omitted or_where conditions back
-		if ( ! empty($this->or_where))
-		{
-			foreach ($this->or_where as $conditional)
-			{
-				$query->or_where($conditional[0], $conditional[1], $conditional[2]);
+				list($method, $conditional) = $where;
+				call_user_func_array(array($query, $method), $conditional);
 			}
 		}
 
@@ -541,6 +609,7 @@ class Query {
 			}
 		}
 		$obj->_relate($rel_objs);
+		$obj->_update_original();
 
 		return $obj;
 	}
@@ -584,6 +653,37 @@ class Query {
 
 		// It's all built, now lets execute and start hydration
 		return $result;
+	}
+
+	/**
+	 * Get the Query as it's been build up to this point and return it as an object
+	 *
+	 * @return Database_Query
+	 */
+	public function get_query()
+	{
+		// Get the columns
+		$columns = $this->select();
+
+		// Start building the query
+		$select = $columns;
+		if ($this->use_subquery())
+		{
+			$select = array();
+			foreach ($columns as $c)
+			{
+				$select[] = $c[0];
+			}
+		}
+		$query = call_user_func_array('DB::select', $select);
+
+		// Set from table
+		$query->from(array(call_user_func($this->model.'::table'), $this->alias));
+
+		// Build the query further
+		$tmp     = $this->build_query($query, $columns);
+
+		return $tmp['query'];
 	}
 
 	/**
@@ -738,8 +838,8 @@ class Query {
 		$this->group_by  = array();
 
 		// Build query and execute update
-		$query = \DB::update(array(call_user_func($this->model.'::table'), $this->alias));
-		$tmp   = $this->build_query($query);
+		$query = \DB::update(call_user_func($this->model.'::table'));
+		$tmp   = $this->build_query($query, array(), 'update');
 		$query = $tmp['query'];
 		$res = $query->set($this->values)->execute();
 
@@ -765,8 +865,8 @@ class Query {
 		$this->group_by  = array();
 
 		// Build query and execute update
-		$query = \DB::delete(array(call_user_func($this->model.'::table'), $this->alias));
-		$tmp   = $this->build_query($query);
+		$query = \DB::delete(call_user_func($this->model.'::table'));
+		$tmp   = $this->build_query($query, array(), 'delete');
 		$query = $tmp['query'];
 		$res = $query->execute();
 
