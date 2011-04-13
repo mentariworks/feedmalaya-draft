@@ -23,7 +23,7 @@ class Create_posts {
 					'author_id' => array('constraint' => 30, 'type' => 'bigint'),
 					'title' => array('constraint' => 255, 'type' => 'varchar'),
 					'slug' => array('constraint' => 255, 'type' => 'varchar'),
-					'except' => array('constraint' => 300, 'type' => 'varchar'),
+					'excerpt' => array('constraint' => 300, 'type' => 'varchar'),
 					'content' => array('type' => 'text'),
 					'publish_on' => array('type' => 'datetime'),
 					'fetch_on' => array('type' => 'datetime'),
