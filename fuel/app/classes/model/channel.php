@@ -11,7 +11,9 @@
  * @license    GPLv2 License (or later)
  * @link       http://github.com/mentariworks/feedmalaya
  */
-class Model_Channel extends ActiveRecord\Model {
+class Model_Channel extends Orm\Model {
+	
+	protected static $_properties = array('id', 'name', 'slug', 'status');
 	
 }
 

@@ -11,14 +11,16 @@
  * @license    GPLv2 License (or later)
  * @link       http://github.com/mentariworks/feedmalaya
  */
-class Model_Post extends ActiveRecord\Model {
+class Model_Post extends Orm\Model {
 
-	protected $belongs_to = array(
-		'authors' => array('class_name' => 'Model_Author'),
-		'sites' => array('class_name' => 'Model_Site'),
+	protected static $_properties = array('id', 'site_id', 'author_id', 'title', 'slug',
+		'excerpt', 'content', 'publish_on', 'fetch_on', 'status');
+	protected static $_belongs_to = array(
+		'authors' => array('model_to' => 'Model_Author'),
+		'sites' => array('model_to' => 'Model_Site'),
 	);
-	protected $has_many = array(
-		'comments' => array('class_name' => 'Model_Comment'),
+	protected static $_has_many = array(
+		'comments' => array('model_to' => 'Model_Comment'),
 	);
 
 }

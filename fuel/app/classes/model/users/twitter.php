@@ -11,11 +11,12 @@
  * @license    GPLv2 License (or later)
  * @link       http://github.com/mentariworks/feedmalaya
  */
-class Model_Users_Twitter extends ActiveRecord\Model {
+class Model_Users_Twitter extends Orm\Model {
 
-	protected $belongs_to = array(
-		'twitters' => array('class_name' => 'Model_Twitter'),
-		'users' => array('class_name' => 'Model_User'),
+	protected static $_properties = array('id', 'user_id', 'twitter_id', 'token_key', 'secret_key');
+	protected static $_belongs_to = array(
+		'twitters' => array('model_to' => 'Model_Twitter'),
+		'users' => array('model_to' => 'Model_User'),
 	);
 
 }

@@ -11,11 +11,12 @@
  * @license    GPLv2 License (or later)
  * @link       http://github.com/mentariworks/feedmalaya
  */
-class Model_Users_Role extends ActiveRecord\Model {
+class Model_Users_Role extends Orm\Model {
 
-	protected $belongs_to = array(
-		'roles' => array('class_name' => 'Model_Role'),
-		'users' => array('class_name' => 'Model_User'),
+	protected static $_properties = array('id', 'user_id', 'role_id');
+	protected static $_belongs_to = array(
+		'roles' => array('model_to' => 'Model_Role'),
+		'users' => array('model_to' => 'Model_User'),
 	);
 
 }

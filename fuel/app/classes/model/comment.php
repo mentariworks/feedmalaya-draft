@@ -11,12 +11,14 @@
  * @license    GPLv2 License (or later)
  * @link       http://github.com/mentariworks/feedmalaya
  */
-class Model_Comment extends ActiveRecord\Model { 
+class Model_Comment extends Orm\Model { 
 	
-	protected $belongs_to = array (
-		'comments' => array('class_name' => 'Model_Comment'),
-		'posts' => array('class_name' => 'Model_Post'),
-		'users' => array('class_name' => 'Model_User'),
+	protected static $_properties = array('id', 'parent_comment_id', 'post_id', 'user_id',
+		'content', 'publish_on', 'status');
+	protected static $_belongs_to = array (
+		//'comments' => array('model_to' => 'Model_Comment'),
+		'posts' => array('model_to' => 'Model_Post'),
+		'users' => array('model_to' => 'Model_User'),
 	);
 	
 }

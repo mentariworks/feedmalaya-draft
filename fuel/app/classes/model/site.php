@@ -11,11 +11,12 @@
  * @license    GPLv2 License (or later)
  * @link       http://github.com/mentariworks/feedmalaya
  */
-class Model_Site extends ActiveRecord\Model {
+class Model_Site extends Orm\Model {
 
-	protected $has_many = array(
-		'authors' => array('class_name' => 'Model_Author'),
-		'posts' => array('class_name' => 'Model_Post'),
+	protected static $_properties = array('id', 'user_id', 'name', 'url', 'feed', 'status');
+	protected static $_has_many = array(
+		'authors' => array('model_to' => 'Model_Author'),
+		'posts' => array('model_to' => 'Model_Post'),
 	);
 
 }

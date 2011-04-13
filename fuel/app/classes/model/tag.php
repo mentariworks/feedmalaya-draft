@@ -11,7 +11,9 @@
  * @license    GPLv2 License (or later)
  * @link       http://github.com/mentariworks/feedmalaya
  */
-class Model_Tag extends ActiveRecord\Model {
+class Model_Tag extends Orm\Model {
+	
+	protected static $_properties = array('id', 'name', 'slug');
 	
 }
 

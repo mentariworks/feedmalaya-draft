@@ -11,10 +11,11 @@
  * @license    GPLv2 License (or later)
  * @link       http://github.com/mentariworks/feedmalaya
  */
-class Model_Role extends ActiveRecord\Model {
+class Model_Role extends Orm\Model {
 
-	protected $has_many = array(
-		'users_roles' => array('class_name' => 'Model_Users_Role'),
+	protected static $_properties = array('id', 'name', 'active');
+	protected static $_has_many = array(
+		'users_roles' => array('model_to' => 'Model_Users_Role'),
 	);
 
 }

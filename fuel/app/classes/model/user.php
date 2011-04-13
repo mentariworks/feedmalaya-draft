@@ -11,16 +11,17 @@
  * @license    GPLv2 License (or later)
  * @link       http://github.com/mentariworks/feedmalaya
  */
-class Model_User extends ActiveRecord\Model {
+class Model_User extends Orm\Model {
 
-	protected $has_many = array(
-		'comments' => array('class_name' => 'Model_Comment'),
-		'users_roles' => array('class_name' => 'Model_Users_Role'),
+	protected static $_properties = array('id', 'user_name', 'email', 'status');
+	protected static $_has_many = array(
+		'comments' => array('model_to' => 'Model_Comment'),
+		'users_roles' => array('model_to' => 'Model_Users_Role'),
 	);
-	protected $has_one = array(
-		'users_auths' => array('class_name' => 'Model_Users_Auths'),
-		'users_meta' => array('class_name' => 'Model_Users_Metum'),
-		'users_twitters' => array('class_name' => 'Model_Users_Twitter'),
+	protected static $_has_one = array(
+		'users_auths' => array('model_to' => 'Model_Users_Auths'),
+		'users_meta' => array('model_to' => 'Model_Users_Metum'),
+		'users_twitters' => array('model_to' => 'Model_Users_Twitter'),
 	);
 
 }

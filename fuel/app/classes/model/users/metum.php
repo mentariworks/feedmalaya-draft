@@ -11,10 +11,12 @@
  * @license    GPLv2 License (or later)
  * @link       http://github.com/mentariworks/feedmalaya
  */
-class Model_Users_Metum extends ActiveRecord\Model {
+class Model_Users_Metum extends Orm\Model {
 
-	protected $belongs_to = array(
-		'users' => array('class_name' => 'Model_User'),
+	protected static $_properties = array('id', 'user_id', 'full_name', 'first_name', 'last_name',
+		'birthdate');
+	protected static $_belongs_to = array(
+		'users' => array('model_to' => 'Model_User'),
 	);
 
 }
