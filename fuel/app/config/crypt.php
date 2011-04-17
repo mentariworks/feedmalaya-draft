@@ -41,7 +41,11 @@ return array(
      *
      * See http://www.php.net/manual/en/mcrypt.constants.php for available cipher modes
      */
-    'mcrypt_mode'    => 'cbc'
+    'mcrypt_mode'    => 'cbc',
+	
+	'crypto_key' => 'cqUj8M92AE3g-noUREMKcDAg',
+	'crypto_iv' => 'kzkbYgO4YW58LoceYUHBMZtQ',
+	'crypto_hmac' => 'ZY4st0oVwNJkLQwphEvU0Tqo',
 
 );
 
