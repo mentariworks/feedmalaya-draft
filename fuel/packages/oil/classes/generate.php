@@ -40,11 +40,13 @@ class Generate
 		$args = self::_clear_args($args);
 		$singular = strtolower(array_shift($args));
 		$actions = $args;
+		
+		$filename = trim(str_replace(array('_', '-'), DS, $singular), DS);
 
-		$filepath = APPPATH . 'classes/controller/'.trim(str_replace(array('_', '-'), DS, $singular), DS).'.php';
+		$filepath = APPPATH . 'classes/controller/'.$filename.'.php';
 
 		// Uppercase each part of the class name and remove hyphens
-		$class_name = static::class_name($singular);
+		$class_name = \Inflector::classify($plural);
 
 		// Stick "blogs" to the start of the array
 		array_unshift($args, $singular);
@@ -73,7 +75,7 @@ class Controller_{$class_name} extends Controller_Template {
 {$action_str}
 }
 
-/* End of file $singular.php */
+/* End of file $filename.php */
 CONTROLLER;
 
 		// Write controller
@@ -92,18 +94,20 @@ CONTROLLER;
 		}
 
 		$plural = \Inflector::pluralize($singular);
+		
+		$filename = trim(str_replace(array('_', '-'), DS, $singular), DS);
 
-		$filepath = APPPATH . 'classes/model/'.trim(str_replace(array('_', '-'), DS, $singular), DS).'.php';
+		$filepath = APPPATH . 'classes/model/'.$filename.'.php';
 
 		// Uppercase each part of the class name and remove hyphens
-		$class_name = static::class_name($singular);
+		$class_name = \Inflector::classify($plural);
 
 		$model = <<<MODEL
 <?php
 
 class Model_{$class_name} extends Orm\Model { }
 
-/* End of file $singular.php */
+/* End of file $filename.php */
 MODEL;
 
 		// Build the model
@@ -456,11 +460,6 @@ HELP;
 		}
 
 		return $result;
-	}
-
-	public static function class_name($name)
-	{
-		return str_replace(array(' ', '-'), '_', ucwords(str_replace('_', ' ', $name)));
 	}
 
 	// Helper methods

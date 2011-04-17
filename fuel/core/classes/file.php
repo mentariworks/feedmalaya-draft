@@ -282,11 +282,12 @@ class File {
 			throw new \File_Exception('Invalid basepath, cannot update a file at this location.');
 		}
 
-		if ($file = static::open_file(@fopen($new_file, 'w'), true, $area) !== false) 
+		if ( ! $file = static::open_file(@fopen($new_file, 'w'), true, $area) )
 		{
-			fwrite($file, $contents);
-			static::close_file($file, $area);
+			throw new \File_Exception('No write access, cannot update a file.');
 		}
+		fwrite($file, $contents);
+		static::close_file($file, $area);
 
 		return true;
 	}
@@ -498,6 +499,12 @@ class File {
 		if (is_string($resource))
 		{
 			$resource = fopen($resource, 'r+');
+		}
+
+		// Make sure the parameter is a valid resource
+		if ( ! is_resource($resource))
+		{
+			return false;
 		}
 
 		// If locks aren't used, don't lock

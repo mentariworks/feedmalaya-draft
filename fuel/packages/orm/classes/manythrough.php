@@ -61,6 +61,11 @@ class ManyThrough extends Relation {
 
 		$this->cascade_save    = array_key_exists('cascade_save', $config) ? $config['cascade_save'] : $this->cascade_save;
 		$this->cascade_delete  = array_key_exists('cascade_save', $config) ? $config['cascade_save'] : $this->cascade_delete;
+
+		if ( ! class_exists($this->model_to))
+		{
+			throw new Exception('Related model not found by Many_Through relation "'.$this->name.'": '.$this->model_to);
+		}
 	}
 
 	public function get(Model $from)
@@ -183,14 +188,16 @@ class ManyThrough extends Relation {
 		}
 
 		// break all existing relations
+		$model_from->unfreeze();
 		$rels = $model_from->_relate();
 		$rels[$this->name] = array();
 		$model_from->_relate($rels);
+		$model_from->freeze();
 
 		// TODO:
 		// May need to delete all through models as well, but could also be considered desirable cascading behavior
 
-		$cascade = is_null($cascade) ? $this->cascade_save : (bool) $cascade;
+		$cascade = is_null($cascade) ? $this->cascade_delete : (bool) $cascade;
 		if ($cascade and ! empty($models_to))
 		{
 			foreach ($models_to as $m)
@@ -201,4 +208,4 @@ class ManyThrough extends Relation {
 	}
 }
 
-/* End of file manymany.php */
+///* End of file manymany.php */
