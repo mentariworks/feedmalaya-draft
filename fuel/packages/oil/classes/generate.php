@@ -102,10 +102,23 @@ CONTROLLER;
 		// Uppercase each part of the class name and remove hyphens
 		$class_name = \Inflector::classify($plural);
 
+		$contents = '';
+		if ( ! \Cli::option('no-timestamps', false))
+		{
+			$contents = <<<CONTENTS
+
+	protected static \$_observers = array(
+		'Orm\\Observer_CreatedAt' => array('before_insert'),
+		'Orm\\Observer_UpdatedAt' => array('before_save'),
+	);
+
+CONTENTS;
+		}
+
 		$model = <<<MODEL
 <?php
 
-class Model_{$class_name} extends Orm\Model { }
+class Model_{$class_name} extends Orm\Model {{$contents}}
 
 /* End of file $filename.php */
 MODEL;
