@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Fuel
- *
  * Fuel is a fast, lightweight, community driven PHP5 framework.
  *
  * @package    Fuel
@@ -27,7 +25,7 @@ namespace Hybrid;
  * @category    Chart_Table
  * @author      Mior Muhammad Zaki <crynobone@gmail.com>
  */
-class Chart_Table extends Table {
+class Chart_Table extends Chart {
 
 	public function __construct() 
 	{

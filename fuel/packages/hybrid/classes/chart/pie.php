@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Fuel
- *
  * Fuel is a fast, lightweight, community driven PHP5 framework.
  *
  * @package    Fuel
@@ -27,7 +25,7 @@ namespace Hybrid;
  * @category    Chart_Pie
  * @author      Mior Muhammad Zaki <crynobone@gmail.com>
  */
-class Chart_Pie extends Table {
+class Chart_Pie extends Chart {
 
 	public function __construct() 
 	{
@@ -46,7 +44,7 @@ class Chart_Pie extends Table {
 
 		$options = json_encode($this->options);
 
-		$id = 'pie_' . md5($columns . $rows . time());
+		$id = 'pie_' . md5($columns . $rows . time() . microtime());
 
 		return <<<SCRIPT
 <div id="{$id}" style="width:{$width}; height:{$height};"></div>

@@ -1,7 +1,6 @@
 <?php
+
 /**
- * Fuel
- *
  * Fuel is a fast, lightweight, community driven PHP5 framework.
  *
  * @package		Fuel
@@ -13,52 +12,77 @@
 
 namespace Hybrid;
 
-
-
 class Pagination {
 
 	/**
-	 * @var	integer	The current page
+	 * The current page
+	 * 
+	 * @access		public
+	 * @staticvar	int
 	 */
 	public static $current_page = null;
 
 	/**
-	 * @var	integer	The offset that the current page starts at
+	 * The offset that the current page starts at
+	 * 
+	 * @access		public
+	 * @staticvar	int
 	 */
 	public static $offset = 0;
 
 	/**
-	 * @var	integer	The number of items per page
+	 * The number of items per page
+	 * 
+	 * @access		public
+	 * @staticvar	int
 	 */
 	public static $per_page = 10;
 
 	/**
-	 * @var	integer	The number of total pages
+	 * The number of total pages
+	 * 
+	 * @access		public
+	 * @staticvar	int
 	 */
 	public static $total_pages = 0;
 
 	/**
-	 * @var	integer	The total number of items
+	 * The total number of items
+	 * 
+	 * @access		protected
+	 * @staticvar	int
 	 */
 	protected static $total_items = 0;
 
 	/**
-	 * @var	integer	The total number of links to show
+	 * The total number of links to show
+	 * 
+	 * @access		protected
+	 * @staticvar	int
 	 */
 	protected static $num_links = 5;
 
 	/**
-	 * @var	integer	The URI segment containg page number
+	 * The URI segment containg page number
+	 * 
+	 * @access		protected
+	 * @staticvar	int
 	 */
 	protected static $uri_segment = 3;
 
 	/**
-	 * @var	mixed	The pagination URL
+	 * The pagination URL
+	 * 
+	 * @access		protected
+	 * @staticvar	mixed
 	 */
 	protected static $pagination_url;
 	
 	/**
-	 * @var	mixed	The pagination URL (after the page number URI segment)
+	 * The pagination URL (after the page number URI segment)
+	 * 
+	 * @access		protected
+	 * @staticvar	mixed
 	 */
 	protected static $suffix_url;
 
@@ -77,16 +101,14 @@ class Pagination {
 		static::set_config($config);
 	}
 
-	// --------------------------------------------------------------------
-
 	/**
 	 * Set Config
 	 *
 	 * Sets the configuration for pagination
 	 *
-	 * @access public
-	 * @param array   $config The configuration array
-	 * @return void
+	 * @access	public
+	 * @param	array	$config The configuration array
+	 * @return	void
 	 */
 	public static function set_config(array $config)
 	{
@@ -99,20 +121,18 @@ class Pagination {
 		static::initialize();
 	}
 
-	// --------------------------------------------------------------------
-
 	/**
 	 * Prepares vars for creating links
 	 *
-	 * @access public
-	 * @return array    The pagination variables
+	 * @access	public
+	 * @return	array    The pagination variables
 	 */
 	protected static function initialize()
 	{
 
 		static::$total_pages = ceil(static::$total_items / static::$per_page) ?: 1;
 
-		static::$current_page = (int) \URI::segment(static::$uri_segment);
+		is_null(static::$current_page) and static::$current_page = (int) \URI::segment(static::$uri_segment);
 
 		if (static::$current_page > static::$total_pages)
 		{
@@ -126,8 +146,6 @@ class Pagination {
 		// The current page must be zero based so that the offset for page 1 is 0.
 		static::$offset = (static::$current_page - 1) * static::$per_page;
 	}
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Creates the pagination links
@@ -143,14 +161,33 @@ class Pagination {
 		}
 
 		$pagination = '';
+		$pagination .= '&nbsp;'.static::prev_link('&laquo; Previous').'&nbsp;&nbsp;';
+		$pagination .= static::page_links();
+		$pagination .= '&nbsp;'.static::next_link('Next &raquo;');
 
+		return $pagination;
+	}
+
+	/**
+	 * Pagination Page Number links
+	 *
+	 * @access	public
+	 * @return	mixed	Markup for page number links
+	 */
+	public static function page_links()
+	{
+		if (static::$total_pages == 1)
+		{
+			return '';
+		}
+		
+		$pagination = '';
+		
 		// Let's get the starting page number, this is determined using num_links
 		$start = ((static::$current_page - static::$num_links) > 0) ? static::$current_page - (static::$num_links - 1) : 1;
 
 		// Let's get the ending page number
 		$end   = ((static::$current_page + static::$num_links) < static::$total_pages) ? static::$current_page + static::$num_links : static::$total_pages;
-
-		$pagination .= '&nbsp;'.static::prev_link('&laquo Previous').'&nbsp;&nbsp;';
 
 		for($i = $start; $i <= $end; $i++)
 		{
@@ -165,19 +202,16 @@ class Pagination {
 			}
 		}
 
-		$pagination .= '&nbsp;'.static::next_link('Next &raquo;');
-
 		return $pagination;
 	}
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Pagination "Next" link
 	 *
-	 * @access public
-	 * @param string $value The text displayed in link
-	 * @return mixed    The next link
+	 * @static
+	 * @access	public
+	 * @param	string	$value The text displayed in link
+	 * @return	mixed	The next link
 	 */
 	public static function next_link($value)
 	{
@@ -197,14 +231,13 @@ class Pagination {
 		}
 	}
 
-	// --------------------------------------------------------------------
-
 	/**
 	 * Pagination "Previous" link
 	 *
-	 * @access public
-	 * @param string $value The text displayed in link
-	 * @return mixed    The previous link
+	 * @static
+	 * @access	public
+	 * @param	string	$value The text displayed in link
+	 * @return	mixed	The previous link
 	 */
 	public static function prev_link($value)
 	{
@@ -225,6 +258,14 @@ class Pagination {
 		}
 	}
 	
+	/**
+	 * Build query string
+	 * 
+	 * @static
+	 * @access	public
+	 * @param	mixed	$values
+	 * @return	string 
+	 */
 	public static function build_get_query($values) 
 	{
 		$dataset = array ();
@@ -233,10 +274,12 @@ class Pagination {
 		{
 			$data = \Hybrid\Input::get($value);
 			
-			if (empty($data)) {
+			if (empty($data))
+			{
 				return false;
 			}
-			else {
+			else 
+			{
 				array_push($dataset, sprintf('%s=%s', $value, $data));
 				return;
 			}

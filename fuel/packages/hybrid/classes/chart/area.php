@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Fuel
- *
  * Fuel is a fast, lightweight, community driven PHP5 framework.
  *
  * @package    Fuel
@@ -46,7 +44,7 @@ class Chart_Area extends Chart {
 
 		$options = json_encode($this->options);
 
-		$id = 'areachart_' . md5($columns . $rows . time());
+		$id = 'areachart_' . md5($columns . $rows . time() . microtime());
 
 		return <<<SCRIPT
 <div id="{$id}"></div>

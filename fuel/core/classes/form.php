@@ -1,7 +1,5 @@
 <?php
 /**
- * Fuel
- *
  * Fuel is a fast, lightweight, community driven PHP5 framework.
  *
  * @package    Fuel
@@ -31,12 +29,20 @@ class Form {
 
 	public static function factory($fieldset = 'default', array $config = array())
 	{
-		if ( ! $fieldset instanceof Fieldset)
+		if (is_string($fieldset))
 		{
-			$fieldset = (string) $fieldset;
-			($set = \Fieldset::instance($fieldset)) && $fieldset = $set;
+			($set = \Fieldset::instance($fieldset)) and $fieldset = $set;
 		}
-		return new static($fieldset);
+
+		if ($fieldset instanceof Fieldset)
+		{
+			if ($fieldset->form(false) != null)
+			{
+				throw new Fuel_Exception('Form instance already exists, cannot be recreated. Use instance() instead of factory() to retrieve the existing instance.');
+			}
+		}
+
+		return new static($fieldset, $config);
 	}
 
 	public static function instance($name = null)
@@ -141,13 +147,14 @@ class Form {
 	 */
 	public static function open($attributes = array(), Array $hidden = array())
 	{
-		$attributes = ! is_array($attributes) ? array('action' => (string) $attributes) : $attributes;
+		$attributes = ! is_array($attributes) ? array('action' => $attributes) : $attributes;
 
 		// If there is still no action set, Form-post
-		if( ! array_key_exists('action', $attributes))
+		if( ! array_key_exists('action', $attributes) or $attributes['action'] === null)
 		{
 			$attributes['action'] = \Uri::current();
 		}
+
 
 		// If not a full URL, create one
 		elseif ( ! strpos($attributes['action'], '://'))
@@ -328,6 +335,28 @@ class Form {
 	}
 
 	/**
+	 * Create a file upload input field
+	 *
+	 * @param	string|array	either fieldname or full attributes array (when array other params are ignored)
+	 * @param	array
+	 * @return
+	 */
+	public static function file($field, Array $attributes = array())
+	{
+		if (is_array($field))
+		{
+			$attributes = $field;
+		}
+		else
+		{
+			$attributes['name'] = (string) $field;
+		}
+		$attributes['type'] = 'file';
+
+		return static::input($attributes);
+	}
+
+	/**
 	 * Create a button
 	 *
 	 * @param	string|array	either fieldname or full attributes array (when array other params are ignored)
@@ -449,7 +478,7 @@ class Form {
 		if (is_array($field))
 		{
 			$attributes = $field;
-			$attributes['selected'] = empty($attributes['value']) ? '' : $attributes['value'];
+			$attributes['selected'] = ! isset($attributes['value']) ? null : $attributes['value'];
 		}
 		else
 		{
@@ -468,7 +497,7 @@ class Form {
 		unset($attributes['options']);
 
 		// Get the selected options then unset it from the array
-		$selected = empty($attributes['selected']) ? array() : array_values((array) $attributes['selected']);
+		$selected = ! isset($attributes['selected']) ? array() : array_values((array) $attributes['selected']);
 		unset($attributes['selected']);
 
 		$input = PHP_EOL;
@@ -573,14 +602,22 @@ class Form {
 	 */
 	protected $fieldset;
 
-	protected function __construct($fieldset)
+	protected function __construct($fieldset, array $config = array())
 	{
-		if ( ! $fieldset instanceof Fieldset)
+		if ($fieldset instanceof Fieldset)
 		{
-			$fieldset = Fieldset::factory($fieldset, array('validation_instance' => $this));
+			$fieldset->form($this);
+			$this->fieldset = $fieldset;
+		}
+		else
+		{
+			$this->fieldset = \Fieldset::factory($fieldset, array('form_instance' => $this));
 		}
 
-		$this->fieldset = $fieldset;
+		foreach ($config as $key => $val)
+		{
+			$this->set_config($key, $val);
+		}
 	}
 
 	/**
@@ -649,18 +686,23 @@ class Form {
 				$build_field = static::hidden($field->name, $field->value, $field->attributes);
 				break;
 			case 'radio': case 'checkbox':
-				if ($field->options())
+				if ($field->options)
 				{
 					$build_field = array();
-					$attributes = $field->attributes;
 					$i = 0;
 					foreach ($field->options as $value => $label)
 					{
+						$attributes = $field->attributes;
 						$attributes['name'] = $field->name;
-						$field->type == 'checkbox' && $attributes['name'] .= '['.$i.']';
+						$field->type == 'checkbox' and $attributes['name'] .= '['.++$i.']';
 
 						$attributes['value'] = $value;
 						$attributes['label'] = $label;
+
+						if (is_array($field->value) ? in_array($value, $field->value) : $value == $field->value)
+						{
+							$attributes['checked'] = 'checked';
+						}
 
 						if (empty($attributes['id']) && $this->get_config('auto_id', false) == true)
 						{
@@ -697,6 +739,9 @@ class Form {
 				unset($attributes['type']);
 				$build_field = static::textarea($field->name, $field->value, $attributes);
 				break;
+			case 'button':
+				$build_field = static::button($field->name, $field->value, $field->attributes);
+				break;
 			default:
 				$build_field = static::input($field->name, $field->value, $field->attributes);
 				break;
@@ -729,6 +774,7 @@ class Form {
 				{
 					$bf_temp = str_replace('{field}', $bf, $match[1]);
 					$bf_temp = str_replace('{label}', $label, $bf_temp);
+					$bf_temp = str_replace('{required}', $required_mark, $bf_temp);
 					$build_fields .= $bf_temp;
 				}
 				$template = str_replace($match[0], $build_fields, $template);

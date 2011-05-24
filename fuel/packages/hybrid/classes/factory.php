@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Fuel
- *
  * Fuel is a fast, lightweight, community driven PHP5 framework.
  *
  * @package    Fuel
@@ -35,39 +33,49 @@ class Factory {
 	/**
 	 * Initiate application configuration
 	 * 
-	 * @access public
+	 * @static
+	 * @access	public
 	 */
 	public static function _init() 
 	{
-		if (is_null(static::$_identity)) 
+		if (!is_null(static::$_identity)) 
 		{
-			\Config::load('app', true);
-
-			static::$_identity = \Config::get('app.identity');
-
-			if (\Config::get('app.maintenance_mode') == true) 
-			{
-				static::_maintenance_mode();
-			}
-
-			$lang = \Session::get(static::$_identity . '_lang');
-
-			if (!is_null($lang)) 
-			{
-				\Config::set('language', $lang);
-				static::$_language = $lang;
-			} 
-			else 
-			{
-				static::$_language = \Config::get('language');
-			}
-
-			\Event::trigger('load_language');
-			\Event::trigger('load_acl');
+			return;
 		}
+		
+		\Config::load('app', true);
+
+		static::$_identity = \Config::get('app.identity');
+
+		if (\Config::get('app.maintenance_mode') == true) 
+		{
+			static::_maintenance_mode();
+		}
+
+		$lang = \Session::get(static::$_identity . '_lang');
+
+		if (!is_null($lang)) 
+		{
+			\Config::set('language', $lang);
+			static::$_language = $lang;
+		} 
+		else 
+		{
+			static::$_language = \Config::get('language');
+		}
+
+		\Event::trigger('load_language');
+		\Event::trigger('load_acl');
 	}
 
-	private static function _maintenance_mode() 
+	/**
+	 * Check for maintenance mode
+	 * 
+	 * @static
+	 * @access	protected
+	 * @throws	\Fuel_Exception
+	 */
+	protected static function _maintenance_mode() 
 	{
 		// This ensures that show_404 is only called once.
 		static $call_count = 0;
@@ -93,19 +101,35 @@ class Factory {
 	/**
 	 * Get application codename
 	 *
-	 * @access public
-	 * @return string
+	 * @static
+	 * @access	public
+	 * @return	string
 	 */
 	public static function get_identity() 
 	{
 		return static::$_identity;
 	}
 
+	/**
+	 * Get application language setup
+	 *
+	 * @static
+	 * @access	public
+	 * @return	string
+	 */
 	public static function get_language() 
 	{
 		return static::$_language;
 	}
 
+	/**
+	 * Initiate a new View object with language setup
+	 *
+	 * @param	string	$file
+	 * @param	mixed	$data
+	 * @param	bool	$encode
+	 * @return	View
+	 */
 	public static function view($file, $data = null, $encode = null) 
 	{
 		return \View::factory(static::$_language . DS . $file, $data, $encode);

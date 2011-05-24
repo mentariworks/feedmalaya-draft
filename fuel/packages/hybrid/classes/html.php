@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Fuel
- *
  * Fuel is a fast, lightweight, community driven PHP5 framework.
  *
  * @package    Fuel
@@ -32,14 +30,16 @@ class Html extends \Fuel\Core\Html {
 	/**
      * Generates a html title tag
      *
-     * @param string $content page title
-     * @return string
+	 * @static
+	 * @access	public
+     * @param	string	$content page title
+     * @return	string
      */
 	public static function title($content = '') 
 	{
 		$title = \Config::get('app.site_name');
 
-		if (!empty($content) && is_string($content)) 
+		if (!empty($content) and is_string($content)) 
 		{
 			$title = sprintf('%s &mdash; %s', $content, $title);
 		}

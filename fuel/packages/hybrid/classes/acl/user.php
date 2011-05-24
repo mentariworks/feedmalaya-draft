@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Fuel
- *
  * Fuel is a fast, lightweight, community driven PHP5 framework.
  *
  * @package    Fuel
@@ -36,10 +34,10 @@ class Acl_User {
 	 * Default value for user data
 	 * 
 	 * @static
-	 * @access private
-	 * @return boolean
+	 * @access	protected
+	 * @return	bool
 	 */
-	private static function _set_default() 
+	protected static function _set_default() 
 	{
 		$twitter = 0;
 
@@ -49,17 +47,21 @@ class Acl_User {
 			'full_name' => '',
 			'email' => '',
 			'roles' => array('guest'),
-			'hash' => '',
+			'_hash' => '',
 			'password' => '',
 			'method' => 'normal',
 			'gender' => '',
-			'age' => 0,
 			'status' => 1,
 			'twitter' => $twitter
 		);
 
 		return true;
 	}
+	
+	protected static $_optionals = array('email', 'status', 'full_name', 'gender', 'birthdate');
+	protected static $_use_meta = true;
+	protected static $_use_auth = true;
+	protected static $_use_twitter = false;
 
 	/**
 	 * Get Acl\Role object, it's a quick way of get and use \Acl\Role without having to 
@@ -71,8 +73,8 @@ class Acl_User {
 	 * $role->add_recources('monkeys');</code>
 	 * 
 	 * @static
-	 * @access public
-	 * @return object
+	 * @access	public
+	 * @return	object
 	 */
 	public static function acl() 
 	{
@@ -88,12 +90,18 @@ class Acl_User {
 	 * @TODO need to use User-Agent as one of the hash value 
 	 * 
 	 * @static
-	 * @access private
-	 * @return boolean
+	 * @access	private
+	 * @return	bool
 	 */
 	public static function _init() 
 	{
+		\Config::load('app', true);
 		\Config::load('crypt', true);
+		
+		if (!is_null(static::$acl))
+		{
+			return;
+		}
 
 		$users = \Cookie::get('_users');
 
@@ -109,6 +117,28 @@ class Acl_User {
 		}
 
 		static::$acl = new \Hybrid\Acl;
+		
+		$config = \Config::get('app.user_table', array());
+		
+		foreach ($config as $key => $value)
+		{
+			if (!!property_exists('\\Hybrid\\Acl_User', "_{$key}"))
+			{
+				$property = '_'.$key;
+				static::$$property = $value;
+				\Config::set("app.user_table.{$key}", $value);
+			}
+		}
+		
+		static::$_optionals = \Config::get('app.user_table.optionals', static::$_optionals);
+		
+		foreach (static::$_optionals as $field)
+		{
+			if (is_string($field) and !isset(static::$items[$field]))
+			{
+				static::$items[$field] = '';
+			}
+		}
 
 		switch ($users->method) 
 		{
@@ -119,20 +149,34 @@ class Acl_User {
 				 * INNER JOIN `users_auths` ON (`users_auths`.`user_id`=`users`.`id`) 
 				 * LEFT JOIN `users_twitters` ON (`users_twitters`.`user_id`=`users`.`id`)   
 				 * WHERE `users`.`id`=%d  */
-				$result = \DB::select('users.*', 'users_auths.password', array('users_twitters.id', 'twitter_id'), 'users_meta.*')
-						->from('users')
+				$results = \DB::select('users.*')
+					->from('users')
+					->where('users.id', '=', static::$items['id'])->limit(1);
+				
+				if (static::$_use_auth === true)
+				{
+					$results->select('users_auths.password')
 						->join('users_auths')
-						->on('users_auths.user_id', '=', 'users.id')
+						->on('users_auths.user_id', '=', 'users.id');
+				}
+				
+				if (static::$_use_meta === true)
+				{
+					$results->select('users_meta.*')
 						->join('users_meta')
-						->on('users_meta.user_id', '=', 'users.id')
+						->on('users_meta.user_id', '=', 'users.id');	
+				}
+				
+				if (static::$_use_twitter === true)
+				{
+					$results->select(array('users_twitters.id', 'twitter_id'))
 						->join('users_twitters', 'left')
-						->on('users_twitters.user_id', '=', 'users.id')
-						->where('users.id', '=', static::$items['id'])
-						->limit(1)
-						->as_object()
-						->execute();
+						->on('users_twitters.user_id', '=', 'users.id');
+				}
+				
+				$result = $results->as_object()->execute();
 
-				break;
+			break;
 
 			case 'twitter_oauth' :
 				/**
@@ -145,7 +189,7 @@ class Acl_User {
 				  ->on('users.id', '=', 'twitters.user_id')
 				  ->where('twitters.id', '=', $twitter_oauth->id)
 				  ->execute(); */
-				break;
+			break;
 		}
 
 		if ($result->count() < 1) 
@@ -167,7 +211,7 @@ class Acl_User {
 			// we validate the hash to add security to this application
 			$hash = $user->user_name . $user->password;
 
-			if (static::$items['hash'] !== static::add_salt($hash)) 
+			if (static::$items['_hash'] !== static::add_salt($hash)) 
 			{
 				static::_unregister();
 				return true;
@@ -175,24 +219,19 @@ class Acl_User {
 
 			static::$items['id'] = $user->id;
 			static::$items['user_name'] = $user->user_name;
-			static::$items['full_name'] = $user->full_name;
-			static::$items['email'] = $user->email;
-			static::$items['status'] = $user->status;
 			static::$items['roles'] = $users->roles;
 			static::$items['password'] = $user->password;
 			
-			if (property_exists($user, 'gender')) 
+			foreach (static::$_optionals as $property)
 			{
-				static::$items['gender'] = $user->gender;
-			}
-			
-			if (property_exists($user, 'birthdate')) 
-			{
-				static::$items['age'] = (int) date('Y') - (int) date('Y', strtotime($user->birthdate));
+				if (\property_exists($user, $property))
+				{
+					static::$items[$property] = $user->{$property};
+				}
 			}
 
 			// if user already link their account with twitter, map the relationship
-			if (!is_null($user->twitter_id)) 
+			if (property_exists($user, 'twitter_id')) 
 			{
 				static::$items['twitter'] = $user->twitter_id;
 			}
@@ -209,10 +248,10 @@ class Acl_User {
 	 * <code>$login = \Hybrid\Acl_User::login('someone', 'password');</code>
 	 * 
 	 * @static
-	 * @access public
-	 * @param string $username
-	 * @param string $password
-	 * @return boolean
+	 * @access	public
+	 * @param	string	$username
+	 * @param	string	$password
+	 * @return	bool
 	 */
 	public static function login($username, $password) 
 	{
@@ -225,19 +264,35 @@ class Acl_User {
 		 * AND `users_auth`.`password`=''  */
 		/* $user = \Model_User::find_by_user_name_or_email($username, $username, array('limit' => 1, 'include' => array('users_auths', 'users_twitters'))); */
 
-		$users = \DB::select('users.*', 'users_auths.password', array('users_twitters.id', 'twitter_id'))
-				->from('users')
+		$result = \DB::select('users.*')
+				->from('users');
+		
+		if (static::$_use_auth === true)
+		{
+			$result->select('users_auths.password')
 				->join('users_auths')
-				->on('users_auths.user_id', '=', 'users.id')
+				->on('users_auths.user_id', '=', 'users.id');
+		}
+
+		if (static::$_use_meta === true)
+		{
+			$result->select('users_meta.*')
+				->join('users_meta')
+				->on('users_meta.user_id', '=', 'users.id');	
+		}
+
+		if (static::$_use_twitter === true)
+		{
+			$result->select(array('users_twitters.id', 'twitter_id'))
 				->join('users_twitters', 'left')
-				->on('users_twitters.user_id', '=', 'users.id')
-				->where_open()
-				->where('users.user_name', '=', $username)
-				->or_where('users.email', '=', $username)
-				->where_close()
-				->limit(1)
-				->as_object()
-				->execute();
+				->on('users_twitters.user_id', '=', 'users.id');
+		}
+
+		$users = $result->where_open()
+			->where('users.user_name', '=', $username)
+			->or_where('users.email', '=', $username)
+			->where_close()
+			->limit(1)->as_object()->execute();
 
 		if ($users->count() < 1) 
 		{
@@ -259,13 +314,18 @@ class Acl_User {
 
 			static::$items['id'] = $user->id;
 			static::$items['user_name'] = $user->user_name;
-			static::$items['full_name'] = $user->full_name;
-			static::$items['email'] = $user->email;
-			static::$items['status'] = $user->status;
 			static::$items['method'] = 'normal';
 			static::$items['password'] = $user->password;
+			
+			foreach (static::$_optionals as $property)
+			{
+				if (\property_exists($user, $property))
+				{
+					static::$items[$property] = $user->{$property};
+				}
+			}
 
-			if (!is_null($user->twitter_id)) 
+			if (property_exists($user, 'twitter_id')) 
 			{
 				static::$items['twitter'] = $user->twitter_id;
 			}
@@ -287,9 +347,9 @@ class Acl_User {
 	 * <code>\Hybrid\Acl_User::logout(false);</code>
 	 * 
 	 * @static
-	 * @access public
-	 * @param boolean $redirect
-	 * @return boolean
+	 * @access	public
+	 * @param	bool	$redirect
+	 * @return	bool
 	 */
 	public static function logout($redirect = true) 
 	{
@@ -305,14 +365,12 @@ class Acl_User {
 
 	/**
 	 * Get user's roles
-	 *
-	 * @TODO: not using ActiveRecord
 	 * 
 	 * @static
-	 * @access private
-	 * @return boolean
+	 * @access	protected
+	 * @return	bool
 	 */
-	private static function _get_roles() 
+	protected static function _get_roles() 
 	{
 		$data = array();
 
@@ -344,14 +402,13 @@ class Acl_User {
 	 * Register user's authentication to Session
 	 *
 	 * @static
-	 * @access private
-	 * @access private
-	 * @return boolean
+	 * @access	protected
+	 * @return	bool
 	 */
-	private static function _register() 
+	protected static function _register() 
 	{
 		$values = static::$items;
-		$values['hash'] = static::add_salt(static::$items['user_name'] . static::$items['password']);
+		$values['_hash'] = static::add_salt(static::$items['user_name'] . static::$items['password']);
 
 		\Cookie::set('_users', \Crypt::encode(serialize((object) $values)));
 
@@ -362,11 +419,11 @@ class Acl_User {
 	 * Delete user's authentication
 	 *
 	 * @static
-	 * @access public
-	 * @param boolean $delete set to true to delete session, only when login out
-	 * @return boolean
+	 * @access	protected
+	 * @param	bool	$delete set to true to delete session, only when login out
+	 * @return	bool
 	 */
-	private static function _unregister($delete = false) 
+	protected static function _unregister($delete = false) 
 	{
 		static::_set_default();
 
@@ -386,8 +443,8 @@ class Acl_User {
 	 * <code>false === \Hybrid\Acl_User::is_logged()</code>
 	 *
 	 * @static
-	 * @access public
-	 * @return boolean
+	 * @access	public
+	 * @return	bool
 	 */
 	public static function is_logged() 
 	{
@@ -398,13 +455,13 @@ class Acl_User {
 	 * Enable to add salt to increase the security of the system
 	 *
 	 * @static
-	 * @access public
-	 * @param string $password
-	 * @return string
+	 * @access	public
+	 * @param	string	$password
+	 * @return	string
 	 */
 	public static function add_salt($password = '') 
 	{
-		$salt = \Config::get('crypt.salt');
+		$salt =  \Config::get('app.salt', \Config::get('crypt.crypto_key'));
 
 		return sha1($salt . $password);
 	}
@@ -417,8 +474,8 @@ class Acl_User {
 	 * <code>$user = \Hybrid\Acl_User::get();</code>
 	 *
 	 * @static
-	 * @access public
-	 * @return object
+	 * @access	public
+	 * @return	object
 	 */
 	public static function get($name = null) 
 	{

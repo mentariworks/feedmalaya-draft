@@ -20,4 +20,12 @@ return array(
 	'available_language' => array(
 		'en',
 	),
+	
+	'user_table' => array(
+		'use_meta' => true,
+		'use_auth' => true,
+		'use_twitter' => false,
+	),
+	
+	'salt' => 's8g5MgO5kVtEEmc_o0rP0UfI',
 );

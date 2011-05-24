@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Fuel
- *
  * Fuel is a fast, lightweight, community driven PHP5 framework.
  *
  * @package    Fuel
@@ -25,20 +23,76 @@ namespace Hybrid;
  * @package     Fuel
  * @subpackage  Hybrid
  * @category    Controller_Frontend
+ * @abstract
  * @author      Mior Muhammad Zaki <crynobone@gmail.com>
  */
 abstract class Controller_Frontend extends \Hybrid\Controller {
 
 	/**
-	 * @var string page template
+	 * Page template
+	 * 
+	 * @access	public
+	 * @var		string
 	 */
 	public $template = null;
+	
 	/**
-	 * @var boolean auto render template
-	 * */
+	 * Auto render template
+	 * 
+	 * @access	public
+	 * @var		bool	
+	 */
 	public $auto_render = true;
 
+	/**
+	 * This method will be called after we route to the destinated method
+	 * 
+	 * @access	public
+	 */
 	public function before() 
+	{
+		$this->_prepare_template();
+
+		return parent::before();
+	}
+	
+	/**
+	 * Takes pure data and optionally a status code, then creates the response
+	 * 
+	 * @param	array	$data
+	 * @param	int		$http_code
+	 */
+	protected function response($data = array(), $http_code = 200) 
+	{
+		$this->response->status = $http_code;
+
+		if (is_array($data) and count($data) > 0)
+		{
+			foreach ($data as $key => $value)
+			{
+				$this->template->set($key, $value);
+			}
+		}
+	}
+
+	/**
+	 * This method will be called after we route to the destinated method
+	 * 
+	 * @access	public
+	 */
+	public function after() 
+	{
+		$this->_render_template();
+		
+		return parent::after();
+	}
+	
+	/**
+	 * Prepare template
+	 * 
+	 * @access	protected
+	 */
+	protected function _prepare_template()
 	{
 		$theme_path = \Config::get('app.frontend.template');
 
@@ -58,18 +112,22 @@ abstract class Controller_Frontend extends \Hybrid\Controller {
 			$this->template->auto_encode(false);
 			$this->template->set_filename('index');
 		}
-
-		return parent::before();
 	}
-
-	public function after() 
+	
+	/**
+	 * Render template
+	 * 
+	 * @access	protected
+	 */
+	protected function _render_template()
 	{
+		//we dont want to accidentally change our site_name
+		$this->template->site_name = \Config::get('app.site_name');
+		
 		if ($this->auto_render === true) 
 		{
-			$this->output = $this->template->render();
+			$this->response->body($this->template->render());
 		}
-
-		return parent::after();
 	}
 
 }

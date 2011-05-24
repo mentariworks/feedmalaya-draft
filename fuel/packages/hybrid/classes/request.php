@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Fuel
- *
  * Fuel is a fast, lightweight, community driven PHP5 framework.
  *
  * @package    Fuel
@@ -37,14 +35,14 @@ class Request extends \Fuel\Core\Request {
 	 *
 	 * Usage:
 	 *
-	 * <code>\Hybrid\Request::connector('GET controller/method?hello=world');</code>
+	 * <code>\Hybrid\Request::connect('GET controller/method?hello=world');</code>
 	 *
 	 * @access	public
-	 * @param string $uri		The URI of the request
-	 * @param array $dataset	Set a dataset for GET, POST, PUT or DELETE
-	 * @return object			The new request
+	 * @param	string	$uri - The URI of the request
+	 * @param	array	$dataset - Set a dataset for GET, POST, PUT or DELETE
+	 * @return	object	The new request
 	 */
-	public static function connector($uri, $dataset = array()) 
+	public static function connect($uri, $dataset = array()) 
 	{
 		$uri_segments = explode(' ', $uri);
 		$type = 'GET';
@@ -68,7 +66,7 @@ class Request extends \Fuel\Core\Request {
 
 		logger(\Fuel::L_INFO, 'Creating a new Request with URI = "' . $uri . '"', __METHOD__);
 
-		static::$active = new static($uri, true, $type, $dataset);
+		static::$active = new static($uri, true, $dataset, $type);
 
 		if (!static::$main) 
 		{
@@ -79,26 +77,39 @@ class Request extends \Fuel\Core\Request {
 		return static::$active;
 	}
 
-	private static $_request_data = array();
-	private static $_request_method = '';
+	/**
+	 * Request dataset
+	 * 
+	 * @access	protected
+	 * @var		array
+	 */
+	protected $_request_data = array();
+	
+	/**
+	 * Request method
+	 * 
+	 * @access	protected
+	 * @var		string
+	 */
+	protected $_request_method = '';
 
 	/**
 	 * Creates the new Request object by getting a new URI object, then parsing
 	 * the uri with the Route class. Once constructed we need to save the method 
 	 * and GET/POST/PUT or DELETE dataset
 	 * 
-	 * @param string $uri		The URI of the request
-	 * @param boolean $route	if true use routes to process the URI
-	 * @param string $type		GET|POST|PUT|DELETE
-	 * @param array $dataset 
+	 * @param	string	$uri - The URI of the request
+	 * @param	bool	$route -if true use routes to process the URI
+	 * @param	string	$type - GET|POST|PUT|DELETE
+	 * @param	array	$dataset 
 	 */
-	public function __construct($uri, $route, $type = 'GET', $dataset = array()) 
+	public function __construct($uri, $route, $dataset = array(), $type = 'GET') 
 	{
 		parent::__construct($uri, $route);
 
 		// store this construct method and data staticly
-		static::$_request_method = $type;
-		static::$_request_data = $dataset;
+		$this->_request_method = $type;
+		$this->_request_data = $dataset;
 
 		$this->response = NULL;
 	}
@@ -112,22 +123,22 @@ class Request extends \Fuel\Core\Request {
 	 * <code>$exec = \Hybrid\Request::connector('PUT controller/model?hello=world')->execute();
 	 * \Debug::dump($exec);</code>
 	 * 
-	 * @return object	containing $data and HTTP Response $status
-	 * @see \Request::execute()
+	 * @return	object	containing $data and HTTP Response $status
+	 * @see		\Request::execute()
 	 */
 	public function execute() 
 	{
 		// Since this just a imitation of curl request, \Hybrid\Input need to know the 
 		// request method and data available in the connection.
-		\Hybrid\Input::connect(static::$_request_method, static::$_request_data);
+		\Hybrid\Input::connect($this->_request_method, $this->_request_data);
 
 		$execute = parent::execute();
 
 		// We need to clean-up any request object transfered to \Hybrid\Input so that
 		// any following request to \Hybrid\Input will redirected to \Fuel\Core\Input
 		\Hybrid\Input::disconnect();
-		static::$_request_method = '';
-		static::$_request_data = array();
+		$this->_request_method = '';
+		$this->_request_data = array();
 
 		return $execute;
 	}

@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Fuel
- *
  * Fuel is a fast, lightweight, community driven PHP5 framework.
  *
  * @package    Fuel
@@ -29,8 +27,22 @@ namespace Hybrid;
  */
 class Input {
 
+	/**
+	 * Store \Hybrid\Request object (if available)
+	 * 
+	 * @access		protected
+	 * @staticvar	mixed 
+	 */
 	protected static $request = null;
 
+	/**
+	 * Receive \Hybrid\Request connection information
+	 * 
+	 * @static
+	 * @access	public
+	 * @param	string	$method
+	 * @param	array	$data
+	 */
 	public static function connect($method = '', $data = array()) 
 	{
 		if (!empty($method)) 
@@ -39,6 +51,12 @@ class Input {
 		}
 	}
 
+	/**
+	 * Disconnect current \Hybrid\Request connection
+	 * 
+	 * @static
+	 * @access	public
+	 */
 	public static function disconnect() 
 	{
 		static::$request = null;
@@ -55,12 +73,12 @@ class Input {
 		// Check whether this request is from \Fuel\Core\Request or \Hybrid\Request
 		$using_hybrid = false;
 		
-		if (!is_null(static::$request) && static::$request->method !== '') 
+		if (!is_null(static::$request) and static::$request->method !== '') 
 		{
 			$using_hybrid = true;
 		}
 
-		if (!$using_hybrid && $name == 'method') 
+		if (!$using_hybrid and $name == 'method') 
 		{
 			return call_user_func(array('\\Input', 'method'));
 		}
@@ -74,7 +92,7 @@ class Input {
 				$default = $args[1];
 			case count($args) > 0 :
 				$index = $args[0];
-				break;
+			break;
 		}
 
 		if ($name === 'method') 

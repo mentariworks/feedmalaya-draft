@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Fuel
- *
  * Fuel is a fast, lightweight, community driven PHP5 framework.
  *
  * @package    Fuel
@@ -25,10 +23,19 @@ namespace Hybrid;
  * @package     Fuel
  * @subpackage  Hybrid
  * @category    Controller
+ * @abstract
  * @author      Mior Muhammad Zaki <crynobone@gmail.com>
  */
 abstract class Controller extends \Fuel\Core\Controller {
 
+	/**
+	 * Run ACL check and redirect user automatically if user doesn't have the privilege
+	 * 
+	 * @final
+	 * @access	public
+	 * @param	mixed	$resource
+	 * @param	string	$type 
+	 */
 	final protected function _acl($resource, $type = null) 
 	{
 		$status = \Hybrid\Acl::access_status($resource, $type);
@@ -37,10 +44,15 @@ abstract class Controller extends \Fuel\Core\Controller {
 		{
 			case 401 :
 				\Request::show_404();
-				break;
+			break;
 		}
 	}
 
+	/**
+	 * This method will be called after we route to the destinated method
+	 * 
+	 * @access	public
+	 */
 	public function before() 
 	{
 		$this->language = \Hybrid\Factory::get_language();
@@ -51,6 +63,11 @@ abstract class Controller extends \Fuel\Core\Controller {
 		return parent::before();
 	}
 
+	/**
+	 * This method will be called after we route to the destinated method
+	 * 
+	 * @access	public
+	 */
 	public function after() 
 	{
 		\Event::trigger('controller_after');
